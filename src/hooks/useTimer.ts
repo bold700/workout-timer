@@ -25,6 +25,7 @@ export function useStopwatch() {
     setIsRunning(false);
     setIsPaused(true);
     pausedTimeRef.current = time;
+    playSound('end'); // Stop geluid bij pause
   }, [time]);
 
   const reset = useCallback(() => {
@@ -73,6 +74,7 @@ export function useCountdown(initialMinutes: number, initialSeconds: number) {
   const pause = useCallback(() => {
     setIsRunning(false);
     setIsPaused(true);
+    playSound('end'); // Stop geluid bij pause
   }, []);
 
   const reset = useCallback(() => {
@@ -141,6 +143,7 @@ export function useIntervalTimer(workTime: number, restTime: number, rounds: num
   const pause = useCallback(() => {
     setIsRunning(false);
     setIsPaused(true);
+    playSound('end'); // Stop geluid bij pause
   }, []);
 
   const reset = useCallback(() => {
