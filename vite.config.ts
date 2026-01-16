@@ -4,11 +4,12 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: '/workout-timer/',
+  publicDir: 'public',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', '404.html'],
       manifest: {
         name: 'Workout Timer - Boxing & Kickboxing',
         short_name: 'Workout Timer',
