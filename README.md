@@ -32,6 +32,19 @@ De app draait op `http://localhost:3000`
 npm run build
 ```
 
+## GitHub Pages Deployment
+
+De app wordt automatisch geüpdatet naar GitHub Pages wanneer er wordt gepusht naar de `main` branch.
+
+De app is beschikbaar op: https://bold700.github.io/workout-timer/
+
+### Handmatige Deployment
+
+1. Build de app: `npm run build`
+2. Ga naar repository Settings → Pages
+3. Selecteer "GitHub Actions" als source
+4. De workflow zal automatisch draaien bij elke push naar main
+
 ## Mobile App Release
 
 ### iOS (App Store)
