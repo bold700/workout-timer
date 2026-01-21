@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
-  Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle 
@@ -39,12 +38,11 @@ import {
 } from '../services/sonosApi';
 
 interface SonosPanelProps {
-  isVisible: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   onConnectionChange: (connected: boolean) => void;
 }
 
-export default function SonosPanel({ isVisible, onClose, onConnectionChange }: SonosPanelProps) {
+export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [households, setHouseholds] = useState<SonosHousehold[]>([]);
@@ -179,158 +177,156 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
   };
 
   return (
-    <Dialog open={isVisible} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5" />
-            Sonos Settings
-          </DialogTitle>
-        </DialogHeader>
+    <DialogContent className="sm:max-w-[400px]">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <Volume2 className="h-5 w-5" />
+          Sonos Settings
+        </DialogTitle>
+      </DialogHeader>
 
-        <div className="grid gap-6 py-4">
-          {!connected ? (
-            <div className="text-center py-4">
-              <Volume2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-6">
-                Connect with Sonos to control your music during workouts.
-              </p>
-              <Button variant="sonos" onClick={handleLogin} className="w-full">
-                Connect to Sonos
-              </Button>
-            </div>
-          ) : (
-            <>
-              {loading && (
-                <div className="text-center py-4 text-muted-foreground">Loading...</div>
-              )}
-              
-              {error && (
-                <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-md text-sm">
-                  {error}
+      <div className="grid gap-6 py-4">
+        {!connected ? (
+          <div className="text-center py-4">
+            <Volume2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mb-6">
+              Connect with Sonos to control your music during workouts.
+            </p>
+            <Button variant="sonos" onClick={handleLogin} className="w-full">
+              Connect to Sonos
+            </Button>
+          </div>
+        ) : (
+          <>
+            {loading && (
+              <div className="text-center py-4 text-muted-foreground">Loading...</div>
+            )}
+            
+            {error && (
+              <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
+
+            {!loading && households.length > 0 && (
+              <>
+                {/* Household selector */}
+                <div className="grid gap-2">
+                  <Label>Household</Label>
+                  <Select value={selectedHousehold} onValueChange={handleHouseholdChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select household" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {households.map(h => (
+                        <SelectItem key={h.id} value={h.id}>
+                          {h.name || h.id}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
 
-              {!loading && households.length > 0 && (
-                <>
-                  {/* Household selector */}
+                {/* Group selector */}
+                {groups.length > 0 && (
                   <div className="grid gap-2">
-                    <Label>Household</Label>
-                    <Select value={selectedHousehold} onValueChange={handleHouseholdChange}>
+                    <Label>Speaker / Group</Label>
+                    <Select value={selectedGroup} onValueChange={handleGroupChange}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select household" />
+                        <SelectValue placeholder="Select speaker" />
                       </SelectTrigger>
                       <SelectContent>
-                        {households.map(h => (
-                          <SelectItem key={h.id} value={h.id}>
-                            {h.name || h.id}
+                        {groups.map(g => (
+                          <SelectItem key={g.id} value={g.id}>
+                            {g.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
+                )}
 
-                  {/* Group selector */}
-                  {groups.length > 0 && (
-                    <div className="grid gap-2">
-                      <Label>Speaker / Group</Label>
-                      <Select value={selectedGroup} onValueChange={handleGroupChange}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select speaker" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {groups.map(g => (
-                            <SelectItem key={g.id} value={g.id}>
-                              {g.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+                {/* Volume control */}
+                <div className="grid gap-2">
+                  <Label>Current Volume: {currentVolume}%</Label>
+                  <Slider
+                    value={[currentVolume]}
+                    onValueChange={handleVolumeChange}
+                    min={0}
+                    max={100}
+                    step={1}
+                    disabled={!selectedGroup}
+                  />
+                </div>
 
-                  {/* Volume control */}
-                  <div className="grid gap-2">
-                    <Label>Current Volume: {currentVolume}%</Label>
-                    <Slider
-                      value={[currentVolume]}
-                      onValueChange={handleVolumeChange}
-                      min={0}
-                      max={100}
-                      step={1}
-                      disabled={!selectedGroup}
-                    />
-                  </div>
-
-                  {/* Playback controls */}
-                  <div className="flex justify-center items-center gap-2">
-                    <Button 
-                      variant="secondary"
-                      size="icon-lg"
-                      onClick={() => skipToPreviousTrack(selectedGroup)}
-                      disabled={!selectedGroup}
-                    >
-                      <SkipBack className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      variant="sonos"
-                      size="icon-xl"
-                      onClick={async () => {
-                        await togglePlayPause(selectedGroup);
-                        setIsPlaying(!isPlaying);
-                      }}
-                      disabled={!selectedGroup}
-                    >
-                      {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
-                    </Button>
-                    <Button 
-                      variant="secondary"
-                      size="icon-lg"
-                      onClick={() => skipToNextTrack(selectedGroup)}
-                      disabled={!selectedGroup}
-                    >
-                      <SkipForward className="h-5 w-5" />
-                    </Button>
-                  </div>
-
-                  {/* Duck level */}
-                  <div className="grid gap-2">
-                    <Label>Volume while talking: {duckLevel}%</Label>
-                    <Slider
-                      value={[duckLevel]}
-                      onValueChange={handleDuckLevelChange}
-                      min={0}
-                      max={50}
-                      step={1}
-                    />
-                  </div>
-
-                  {/* Test button */}
+                {/* Playback controls */}
+                <div className="flex justify-center items-center gap-2">
                   <Button 
                     variant="secondary"
-                    onClick={handleVolumeTest}
+                    size="icon-lg"
+                    onClick={() => skipToPreviousTrack(selectedGroup)}
                     disabled={!selectedGroup}
-                    className="w-full"
                   >
-                    Test Volume Ducking
+                    <SkipBack className="h-5 w-5" />
                   </Button>
-                </>
-              )}
+                  <Button 
+                    variant="sonos"
+                    size="icon-xl"
+                    onClick={async () => {
+                      await togglePlayPause(selectedGroup);
+                      setIsPlaying(!isPlaying);
+                    }}
+                    disabled={!selectedGroup}
+                  >
+                    {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
+                  </Button>
+                  <Button 
+                    variant="secondary"
+                    size="icon-lg"
+                    onClick={() => skipToNextTrack(selectedGroup)}
+                    disabled={!selectedGroup}
+                  >
+                    <SkipForward className="h-5 w-5" />
+                  </Button>
+                </div>
 
-              {/* Logout */}
-              <Button 
-                variant="destructive"
-                onClick={handleLogout}
-                className="w-full"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Disconnect Sonos
-              </Button>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+                {/* Duck level */}
+                <div className="grid gap-2">
+                  <Label>Volume while talking: {duckLevel}%</Label>
+                  <Slider
+                    value={[duckLevel]}
+                    onValueChange={handleDuckLevelChange}
+                    min={0}
+                    max={50}
+                    step={1}
+                  />
+                </div>
+
+                {/* Test button */}
+                <Button 
+                  variant="secondary"
+                  onClick={handleVolumeTest}
+                  disabled={!selectedGroup}
+                  className="w-full"
+                >
+                  Test Volume Ducking
+                </Button>
+              </>
+            )}
+
+            {/* Logout */}
+            <Button 
+              variant="destructive"
+              onClick={handleLogout}
+              className="w-full"
+            >
+              <LogOut className="h-4 w-4" />
+              Disconnect Sonos
+            </Button>
+          </>
+        )}
+      </div>
+    </DialogContent>
   );
 }
 

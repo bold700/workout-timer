@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { TimerMode } from './types';
 import { useStopwatch, useCountdown, useIntervalTimer } from './hooks/useTimer';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Settings, Volume2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ModeSelector from './components/ModeSelector';
@@ -148,44 +149,48 @@ export default function App() {
 
         {/* Settings buttons */}
         <div className="flex justify-center gap-3 mt-4 flex-wrap px-4">
-          <Button 
-            variant="outline"
-            size="lg"
-            onClick={() => setShowSettings(true)}
-            disabled={isRunning || mode === 'stopwatch'}
-            className={cn(
-              mode === 'stopwatch' && "invisible"
-            )}
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </Button>
+          {/* Timer Settings Dialog */}
+          <Dialog open={showSettings} onOpenChange={setShowSettings}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                size="lg"
+                disabled={isRunning || mode === 'stopwatch'}
+                className={cn(
+                  mode === 'stopwatch' && "invisible"
+                )}
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+            </DialogTrigger>
+            <SettingsPanel
+              mode={mode}
+              onClose={() => setShowSettings(false)}
+              onSave={handleSettingsSave}
+              currentSettings={getCurrentSettings()}
+            />
+          </Dialog>
           
-          <Button 
-            variant={sonosConnected ? "sonos" : "outline"}
-            size="lg"
-            onClick={() => setShowSonosPanel(true)}
-          >
-            <Volume2 className="h-4 w-4 mr-2" />
-            Sonos
-            {sonosConnected && <Check className="h-4 w-4 ml-1" />}
-          </Button>
+          {/* Sonos Dialog */}
+          <Dialog open={showSonosPanel} onOpenChange={setShowSonosPanel}>
+            <DialogTrigger asChild>
+              <Button 
+                variant={sonosConnected ? "sonos" : "outline"}
+                size="lg"
+              >
+                <Volume2 className="h-4 w-4" />
+                Sonos
+                {sonosConnected && <Check className="h-4 w-4" />}
+              </Button>
+            </DialogTrigger>
+            <SonosPanel
+              onClose={() => setShowSonosPanel(false)}
+              onConnectionChange={handleSonosConnectionChange}
+            />
+          </Dialog>
         </div>
       </div>
-
-      <SettingsPanel
-        mode={mode}
-        isVisible={showSettings}
-        onClose={() => setShowSettings(false)}
-        onSave={handleSettingsSave}
-        currentSettings={getCurrentSettings()}
-      />
-
-      <SonosPanel
-        isVisible={showSonosPanel}
-        onClose={() => setShowSonosPanel(false)}
-        onConnectionChange={handleSonosConnectionChange}
-      />
 
       <HoldToTalk 
         isConnected={sonosConnected}
