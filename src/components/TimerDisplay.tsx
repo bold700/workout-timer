@@ -43,7 +43,7 @@ export default function TimerDisplay({
       )}>
         <Badge 
           variant={isReady ? 'secondary' : (phase === 'work' ? 'work' : 'rest')}
-          className="text-lg px-6 py-2"
+          className="text-lg px-4 py-1"
         >
           {phaseText}
         </Badge>

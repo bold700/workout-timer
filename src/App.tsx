@@ -3,8 +3,7 @@ import { TimerMode } from './types';
 import { useStopwatch, useCountdown, useIntervalTimer } from './hooks/useTimer';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
-import { Settings, Volume2, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Settings, Volume2 } from 'lucide-react';
 import ModeSelector from './components/ModeSelector';
 import TimerDisplay from './components/TimerDisplay';
 import SettingsPanel from './components/SettingsPanel';
@@ -154,14 +153,7 @@ export default function App() {
           {/* Timer Settings Dialog */}
           <Dialog open={showSettings} onOpenChange={setShowSettings}>
             <DialogTrigger asChild>
-              <Button 
-                variant="outline"
-                size="lg"
-                disabled={isRunning || mode === 'stopwatch'}
-                className={cn(
-                  mode === 'stopwatch' && "invisible"
-                )}
-              >
+              <Button variant="ghost">
                 <Settings className="h-4 w-4" />
                 Settings
               </Button>
@@ -177,13 +169,9 @@ export default function App() {
           {/* Sonos Dialog */}
           <Dialog open={showSonosPanel} onOpenChange={setShowSonosPanel}>
             <DialogTrigger asChild>
-              <Button 
-                variant={sonosConnected ? "sonos" : "outline"}
-                size="lg"
-              >
+              <Button variant="ghost">
                 <Volume2 className="h-4 w-4" />
                 Sonos
-                {sonosConnected && <Check className="h-4 w-4" />}
               </Button>
             </DialogTrigger>
             <SonosPanel
