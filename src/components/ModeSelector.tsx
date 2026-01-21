@@ -9,23 +9,21 @@ interface ModeSelectorProps {
 
 export default function ModeSelector({ currentMode, onModeChange, isRunning }: ModeSelectorProps) {
   return (
-    <div className="flex justify-center p-4">
-      <Tabs 
-        value={currentMode} 
-        onValueChange={(value) => !isRunning && onModeChange(value as TimerMode)}
-      >
-        <TabsList>
-          <TabsTrigger value="stopwatch" disabled={isRunning}>
-            Stopwatch
-          </TabsTrigger>
-          <TabsTrigger value="countdown" disabled={isRunning}>
-            Countdown
-          </TabsTrigger>
-          <TabsTrigger value="interval" disabled={isRunning}>
-            Interval
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-    </div>
+    <Tabs 
+      value={currentMode} 
+      onValueChange={(value) => !isRunning && onModeChange(value as TimerMode)}
+    >
+      <TabsList variant="line">
+        <TabsTrigger value="stopwatch" variant="line" disabled={isRunning}>
+          Stopwatch
+        </TabsTrigger>
+        <TabsTrigger value="countdown" variant="line" disabled={isRunning}>
+          Countdown
+        </TabsTrigger>
+        <TabsTrigger value="interval" variant="line" disabled={isRunning}>
+          Interval
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 }
