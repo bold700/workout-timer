@@ -105,14 +105,14 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden">
+    <div className="flex flex-col h-screen w-screen overflow-hidden pt-10 pb-10">
       <ModeSelector 
         currentMode={mode} 
         onModeChange={handleModeChange}
         isRunning={isRunning}
       />
       
-      <div className="flex flex-col flex-1 min-h-0 pb-5">
+      <div className="flex flex-col flex-1 min-h-0">
         {mode === 'stopwatch' && (
           <TimerDisplay 
             time={stopwatch.time} 
