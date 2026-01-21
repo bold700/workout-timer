@@ -59,7 +59,7 @@ export async function handleSonosCallback(code: string, state: string): Promise<
   try {
     // Call our serverless proxy to exchange the code for tokens
     // The proxy keeps the client_secret secure
-    const response = await fetch('https://workout-timer-sonos-proxy.bold700.workers.dev/token', {
+    const response = await fetch('https://workout-timer.morning-wood-5814.workers.dev/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ export async function refreshAccessToken(): Promise<string | null> {
   }
 
   try {
-    const response = await fetch('https://workout-timer-sonos-proxy.bold700.workers.dev/refresh', {
+    const response = await fetch('https://workout-timer.morning-wood-5814.workers.dev/refresh', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
