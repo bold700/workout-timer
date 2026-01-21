@@ -15,8 +15,15 @@
   padding-bottom: 20px;
 }
 
+.settings-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
 .settings-btn {
-  margin: 16px auto 0;
   padding: 12px 24px;
   font-size: 16px;
   font-weight: 600;
@@ -46,4 +53,18 @@
 .settings-btn-hidden {
   visibility: hidden;
   pointer-events: none;
+}
+
+.sonos-settings-btn {
+  border-color: #1db954;
+}
+
+.sonos-settings-btn:hover:not(:disabled) {
+  border-color: #1db954;
+  box-shadow: 0 0 15px rgba(29, 185, 84, 0.3);
+}
+
+.sonos-settings-btn.connected {
+  background: rgba(29, 185, 84, 0.15);
+  border-color: #1db954;
 }

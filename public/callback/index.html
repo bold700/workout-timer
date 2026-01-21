@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sonos Verbinden - Workout Timer</title>
+    <script>
+      // Redirect to main app with callback params preserved
+      var l = window.location;
+      var basePath = '/workout-timer/';
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        basePath +
+        (l.search ? l.search : '') +
+        l.hash
+      );
+    </script>
+  </head>
+  <body>
+    <p>Verbinden met Sonos...</p>
+  </body>
+</html>

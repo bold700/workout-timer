@@ -1,0 +1,9 @@
+name = "workout-timer-sonos-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Environment variables - set these in Cloudflare dashboard for security
+# Don't commit actual secrets here!
+# [vars]
+# SONOS_CLIENT_ID = "your-client-id"
+# SONOS_CLIENT_SECRET = "your-client-secret"
