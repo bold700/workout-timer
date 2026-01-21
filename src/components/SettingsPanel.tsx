@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 interface SettingsPanelProps {
   mode: TimerMode;
@@ -99,82 +100,82 @@ export default function SettingsPanel({ mode, onClose, onSave, currentSettings }
         </DialogDescription>
       </DialogHeader>
       
-      <div className="grid gap-4">
-        {mode === 'countdown' && (
-          <>
-            <div className="grid gap-2">
-              <Label htmlFor="minutes">Minutes</Label>
-              <Input
-                id="minutes"
-                type="number"
-                inputMode="numeric"
-                min="0"
-                max="99"
-                value={settings.minutes}
-                onChange={(e) => handleInputChange('minutes', e.target.value)}
-                onBlur={() => handleInputBlur('minutes', 0, 0, 99)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="seconds">Seconds</Label>
-              <Input
-                id="seconds"
-                type="number"
-                inputMode="numeric"
-                min="0"
-                max="59"
-                value={settings.seconds}
-                onChange={(e) => handleInputChange('seconds', e.target.value)}
-                onBlur={() => handleInputBlur('seconds', 0, 0, 59)}
-              />
-            </div>
-          </>
-        )}
+      {mode === 'countdown' && (
+        <div className="grid gap-4">
+          <div className="grid gap-3">
+            <Label htmlFor="minutes">Minutes</Label>
+            <Input
+              id="minutes"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              max="99"
+              value={settings.minutes}
+              onChange={(e) => handleInputChange('minutes', e.target.value)}
+              onBlur={() => handleInputBlur('minutes', 0, 0, 99)}
+            />
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="seconds">Seconds</Label>
+            <Input
+              id="seconds"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              max="59"
+              value={settings.seconds}
+              onChange={(e) => handleInputChange('seconds', e.target.value)}
+              onBlur={() => handleInputBlur('seconds', 0, 0, 59)}
+            />
+          </div>
+        </div>
+      )}
 
-        {mode === 'interval' && (
-          <>
-            <div className="grid gap-2">
-              <Label htmlFor="workTime">Work Time (seconds)</Label>
-              <Input
-                id="workTime"
-                type="number"
-                inputMode="numeric"
-                min="1"
-                max="600"
-                value={settings.workTime}
-                onChange={(e) => handleInputChange('workTime', e.target.value)}
-                onBlur={() => handleInputBlur('workTime', 1, 1, 600)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="restTime">Rest Time (seconds)</Label>
-              <Input
-                id="restTime"
-                type="number"
-                inputMode="numeric"
-                min="1"
-                max="600"
-                value={settings.restTime}
-                onChange={(e) => handleInputChange('restTime', e.target.value)}
-                onBlur={() => handleInputBlur('restTime', 1, 1, 600)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="rounds">Rounds</Label>
-              <Input
-                id="rounds"
-                type="number"
-                inputMode="numeric"
-                min="1"
-                max="50"
-                value={settings.rounds}
-                onChange={(e) => handleInputChange('rounds', e.target.value)}
-                onBlur={() => handleInputBlur('rounds', 1, 1, 50)}
-              />
-            </div>
-          </>
-        )}
-      </div>
+      {mode === 'interval' && (
+        <div className="grid gap-4">
+          <div className="grid gap-3">
+            <Label htmlFor="workTime">Work Time (seconds)</Label>
+            <Input
+              id="workTime"
+              type="number"
+              inputMode="numeric"
+              min="1"
+              max="600"
+              value={settings.workTime}
+              onChange={(e) => handleInputChange('workTime', e.target.value)}
+              onBlur={() => handleInputBlur('workTime', 1, 1, 600)}
+            />
+          </div>
+          <Separator />
+          <div className="grid gap-3">
+            <Label htmlFor="restTime">Rest Time (seconds)</Label>
+            <Input
+              id="restTime"
+              type="number"
+              inputMode="numeric"
+              min="1"
+              max="600"
+              value={settings.restTime}
+              onChange={(e) => handleInputChange('restTime', e.target.value)}
+              onBlur={() => handleInputBlur('restTime', 1, 1, 600)}
+            />
+          </div>
+          <Separator />
+          <div className="grid gap-3">
+            <Label htmlFor="rounds">Rounds</Label>
+            <Input
+              id="rounds"
+              type="number"
+              inputMode="numeric"
+              min="1"
+              max="50"
+              value={settings.rounds}
+              onChange={(e) => handleInputChange('rounds', e.target.value)}
+              onBlur={() => handleInputBlur('rounds', 1, 1, 50)}
+            />
+          </div>
+        </div>
+      )}
 
       <DialogFooter>
         <DialogClose asChild>

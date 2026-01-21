@@ -4,12 +4,13 @@ import {
   DialogHeader, 
   DialogTitle,
   DialogDescription,
-  DialogFooter,
-  DialogClose
+  DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 import { 
   Select, 
   SelectContent, 
@@ -17,7 +18,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { SkipBack, Play, Pause, SkipForward, Volume2, LogOut } from 'lucide-react';
+import { SkipBack, Play, Pause, SkipForward, Volume2, LogOut, AlertCircle, Loader2 } from 'lucide-react';
 import { 
   isAuthenticated, 
   startSonosAuth, 
@@ -194,10 +195,10 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
         </DialogDescription>
       </DialogHeader>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4">
         {!connected ? (
-          <div className="text-center py-4">
-            <Volume2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <div className="flex flex-col items-center gap-4 py-4">
+            <Volume2 className="h-12 w-12 text-muted-foreground" />
             <Button variant="sonos" onClick={handleLogin} className="w-full">
               Connect to Sonos
             </Button>
@@ -205,22 +206,26 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
         ) : (
           <>
             {loading && (
-              <div className="text-center py-4 text-muted-foreground">Loading...</div>
+              <div className="flex items-center justify-center gap-2 py-4 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Loading...</span>
+              </div>
             )}
             
             {error && (
-              <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-md text-sm">
-                {error}
-              </div>
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
             {!loading && households.length > 0 && (
-              <>
+              <div className="grid gap-4">
                 {/* Household selector */}
                 <div className="grid gap-2">
-                  <Label>Household</Label>
+                  <Label htmlFor="household">Household</Label>
                   <Select value={selectedHousehold} onValueChange={handleHouseholdChange}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger id="household">
                       <SelectValue placeholder="Select household" />
                     </SelectTrigger>
                     <SelectContent>
@@ -236,9 +241,9 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
                 {/* Group selector */}
                 {groups.length > 0 && (
                   <div className="grid gap-2">
-                    <Label>Speaker / Group</Label>
+                    <Label htmlFor="speaker">Speaker / Group</Label>
                     <Select value={selectedGroup} onValueChange={handleGroupChange}>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger id="speaker">
                         <SelectValue placeholder="Select speaker" />
                       </SelectTrigger>
                       <SelectContent>
@@ -253,7 +258,7 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
                 )}
 
                 {/* Volume control */}
-                <div className="grid gap-2">
+                <div className="grid gap-3">
                   <Label>Current Volume: {currentVolume}%</Label>
                   <Slider
                     value={[currentVolume]}
@@ -296,8 +301,10 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
                   </Button>
                 </div>
 
+                <Separator />
+
                 {/* Duck level */}
-                <div className="grid gap-2">
+                <div className="grid gap-3">
                   <Label>Volume while talking: {duckLevel}%</Label>
                   <Slider
                     value={[duckLevel]}
@@ -313,22 +320,20 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
                   variant="secondary"
                   onClick={handleVolumeTest}
                   disabled={!selectedGroup}
-                  className="w-full"
                 >
                   Test Volume Ducking
                 </Button>
-              </>
+              </div>
             )}
           </>
         )}
       </div>
 
       {connected && (
-        <DialogFooter>
+        <DialogFooter className="sm:justify-center">
           <Button 
             variant="destructive"
             onClick={handleLogout}
-            className="w-full"
           >
             <LogOut className="h-4 w-4" />
             Disconnect Sonos
