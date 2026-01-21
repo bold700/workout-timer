@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   DialogContent, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -183,15 +186,18 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
           <Volume2 className="h-5 w-5" />
           Sonos Settings
         </DialogTitle>
+        <DialogDescription>
+          {connected 
+            ? "Control your Sonos speakers and adjust volume settings."
+            : "Connect with Sonos to control your music during workouts."
+          }
+        </DialogDescription>
       </DialogHeader>
 
-      <div className="grid gap-6 py-4">
+      <div className="grid gap-6">
         {!connected ? (
           <div className="text-center py-4">
             <Volume2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-6">
-              Connect with Sonos to control your music during workouts.
-            </p>
             <Button variant="sonos" onClick={handleLogin} className="w-full">
               Connect to Sonos
             </Button>
@@ -313,19 +319,22 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
                 </Button>
               </>
             )}
-
-            {/* Logout */}
-            <Button 
-              variant="destructive"
-              onClick={handleLogout}
-              className="w-full"
-            >
-              <LogOut className="h-4 w-4" />
-              Disconnect Sonos
-            </Button>
           </>
         )}
       </div>
+
+      {connected && (
+        <DialogFooter>
+          <Button 
+            variant="destructive"
+            onClick={handleLogout}
+            className="w-full"
+          >
+            <LogOut className="h-4 w-4" />
+            Disconnect Sonos
+          </Button>
+        </DialogFooter>
+      )}
     </DialogContent>
   );
 }

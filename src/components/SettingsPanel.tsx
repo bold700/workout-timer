@@ -3,8 +3,10 @@ import { TimerMode } from '../types';
 import { 
   DialogContent, 
   DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -87,9 +89,17 @@ export default function SettingsPanel({ mode, onClose, onSave, currentSettings }
     <DialogContent className="sm:max-w-[400px]">
       <DialogHeader>
         <DialogTitle>Timer Settings</DialogTitle>
+        <DialogDescription>
+          {mode === 'countdown' 
+            ? "Set the countdown duration."
+            : mode === 'interval'
+            ? "Configure your interval training settings."
+            : "Configure your timer settings."
+          }
+        </DialogDescription>
       </DialogHeader>
       
-      <div className="grid gap-4 py-4">
+      <div className="grid gap-4">
         {mode === 'countdown' && (
           <>
             <div className="grid gap-2">
@@ -167,9 +177,10 @@ export default function SettingsPanel({ mode, onClose, onSave, currentSettings }
       </div>
 
       <DialogFooter>
-        <Button onClick={handleSave} className="w-full">
-          Save Settings
-        </Button>
+        <DialogClose asChild>
+          <Button variant="outline">Cancel</Button>
+        </DialogClose>
+        <Button onClick={handleSave}>Save changes</Button>
       </DialogFooter>
     </DialogContent>
   );
