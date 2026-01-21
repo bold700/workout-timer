@@ -1,7 +1,8 @@
 // Sonos Control API Service
 import { getValidAccessToken, getHouseholdId, getGroupId } from './sonosAuth';
 
-const SONOS_API_BASE = 'https://api.ws.sonos.com/control/api/v1';
+// Use our proxy to avoid CORS issues
+const SONOS_PROXY_BASE = 'https://sonos-proxy.morning-wood-5814.workers.dev';
 
 // Types
 export interface SonosHousehold {
@@ -33,7 +34,7 @@ export interface SonosGroupVolume {
   fixed: boolean;
 }
 
-// Generic API call helper
+// Generic API call helper - routes through our proxy to avoid CORS
 async function sonosApiCall<T>(
   endpoint: string,
   method: 'GET' | 'POST' = 'GET',
@@ -47,13 +48,17 @@ async function sonosApiCall<T>(
   }
 
   try {
-    const response = await fetch(`${SONOS_API_BASE}${endpoint}`, {
-      method,
+    const response = await fetch(`${SONOS_PROXY_BASE}/api`, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: JSON.stringify({
+        endpoint,
+        method,
+        body,
+        accessToken,
+      }),
     });
 
     if (!response.ok) {
