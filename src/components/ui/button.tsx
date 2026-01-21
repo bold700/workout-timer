@@ -3,28 +3,34 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-[var(--accent)] text-[var(--bg-primary)] hover:bg-[var(--accent-hover)] shadow-lg shadow-[var(--accent)]/20",
-        destructive: "bg-red-500 text-white hover:bg-red-600",
-        outline: "border-2 border-[var(--bg-tertiary)] bg-transparent hover:bg-[var(--bg-tertiary)] hover:border-[var(--accent)]",
-        secondary: "bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]",
-        ghost: "hover:bg-[var(--bg-tertiary)]",
-        link: "text-[var(--accent)] underline-offset-4 hover:underline",
-        sonos: "bg-[#1db954] text-white hover:bg-[#1ed760] shadow-lg shadow-[#1db954]/30",
-        work: "bg-[var(--work)] text-white hover:opacity-90 shadow-lg shadow-[var(--work)]/30",
-        rest: "bg-[var(--rest)] text-[var(--bg-primary)] hover:opacity-90 shadow-lg shadow-[var(--rest)]/30",
+        default:
+          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+        work: "bg-[var(--color-work)] text-white shadow-sm hover:bg-[var(--color-work)]/90",
+        rest: "bg-[var(--color-rest)] text-black shadow-sm hover:bg-[var(--color-rest)]/90",
+        sonos: "bg-[var(--color-sonos)] text-white shadow-sm hover:bg-[var(--color-sonos)]/90",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-12 px-8 text-base",
-        xl: "h-14 px-10 text-lg",
-        icon: "h-10 w-10",
-        "icon-lg": "h-12 w-12",
-        "icon-xl": "h-14 w-14",
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-10 rounded-md px-8",
+        xl: "h-12 rounded-md px-10 text-base",
+        xxl: "h-16 rounded-md px-12 text-lg",
+        icon: "h-9 w-9",
+        "icon-sm": "h-8 w-8",
+        "icon-lg": "h-10 w-10",
+        "icon-xl": "h-12 w-12",
       },
     },
     defaultVariants: {

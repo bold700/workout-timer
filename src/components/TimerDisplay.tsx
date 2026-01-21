@@ -1,4 +1,5 @@
 import { formatTime, formatTimeSimple } from '../utils/formatTime';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface TimerDisplayProps {
@@ -19,36 +20,26 @@ export default function TimerDisplay({ time, mode, phase, round, totalRounds, is
   const phaseText = isReady ? 'READY' : (phase === 'work' ? 'WORK' : 'REST');
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 p-5 min-h-0">
+    <div className="flex flex-col items-center justify-center flex-1 p-5 min-h-0 gap-6">
       {/* Timer info - only visible in interval mode */}
       <div className={cn(
-        "flex flex-col items-center gap-3 mb-5",
-        mode !== 'interval' && "invisible pointer-events-none"
+        "flex flex-col items-center gap-3",
+        mode !== 'interval' && "invisible"
       )}>
-        {/* Phase indicator */}
-        <div className={cn(
-          "text-2xl font-bold tracking-[4px] px-6 py-3 rounded-xl uppercase bg-[var(--bg-tertiary)]",
-          "md:text-xl md:px-5 md:py-2.5",
-          isReady && "text-white border-2 border-[var(--accent)] bg-gradient-to-br from-[#00d9ff] to-[#00a8cc] shadow-[0_0_20px_var(--accent-glow)] animate-pulse",
-          !isReady && phase === 'work' && "text-white border-2 border-[var(--work)] bg-gradient-to-br from-[#ff006e] to-[#ff4d9e] shadow-[0_0_20px_var(--work-glow)] animate-pulse",
-          !isReady && phase === 'rest' && "text-white border-2 border-[var(--accent)] bg-gradient-to-br from-[#00f5a0] to-[#00d9a5] shadow-[0_0_20px_var(--rest-glow)] animate-pulse"
-        )}>
+        <Badge 
+          variant={isReady ? 'secondary' : (phase === 'work' ? 'work' : 'rest')}
+          className="text-lg px-6 py-2"
+        >
           {phaseText}
-        </div>
+        </Badge>
         
-        {/* Round indicator */}
-        <div className="text-lg text-[var(--text-secondary)] font-medium md:text-base">
+        <span className="text-sm text-muted-foreground">
           Round {round} / {totalRounds}
-        </div>
+        </span>
       </div>
       
       {/* Time display */}
-      <div className={cn(
-        "text-[clamp(64px,20vw,120px)] font-bold tabular-nums leading-none text-center",
-        "bg-gradient-to-br from-[#00d9ff] to-[#00a8cc] bg-clip-text text-transparent",
-        "drop-shadow-[0_0_10px_var(--accent-glow)] tracking-tight",
-        "md:text-[clamp(48px,25vw,96px)]"
-      )}>
+      <div className="text-[clamp(64px,20vw,120px)] font-bold tabular-nums leading-none text-center text-foreground">
         {displayTime}
       </div>
     </div>

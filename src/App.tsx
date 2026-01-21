@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { TimerMode } from './types';
 import { useStopwatch, useCountdown, useIntervalTimer } from './hooks/useTimer';
+import { Button } from '@/components/ui/button';
+import { Settings, Volume2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Settings, Volume2 } from 'lucide-react';
 import ModeSelector from './components/ModeSelector';
 import TimerDisplay from './components/TimerDisplay';
 import ControlButtons from './components/ControlButtons';
@@ -104,7 +105,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[var(--bg-primary)] overflow-hidden">
+    <div className="flex flex-col h-screen w-screen overflow-hidden">
       <ModeSelector 
         currentMode={mode} 
         onModeChange={handleModeChange}
@@ -146,37 +147,29 @@ export default function App() {
         />
 
         {/* Settings buttons */}
-        <div className="flex justify-center gap-3 mt-4 flex-wrap">
-          <button 
-            className={cn(
-              "px-6 py-3 text-base font-semibold rounded-lg flex items-center gap-2 transition-all",
-              "bg-[var(--bg-tertiary)] text-white border-2 border-[var(--bg-tertiary)]",
-              "hover:bg-[var(--bg-secondary)] hover:border-[var(--accent)] hover:shadow-[0_0_15px_rgba(0,217,255,0.2)] hover:-translate-y-0.5",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-              mode === 'stopwatch' && "invisible pointer-events-none"
-            )}
+        <div className="flex justify-center gap-3 mt-4 flex-wrap px-4">
+          <Button 
+            variant="outline"
+            size="lg"
             onClick={() => setShowSettings(true)}
             disabled={isRunning || mode === 'stopwatch'}
-            aria-hidden={mode === 'stopwatch'}
-          >
-            <Settings className="w-5 h-5" />
-            Timer
-          </button>
-          
-          <button 
             className={cn(
-              "px-6 py-3 text-base font-semibold rounded-lg flex items-center gap-2 transition-all",
-              "bg-[var(--bg-tertiary)] text-white border-2",
-              "hover:shadow-[0_0_15px_rgba(29,185,84,0.3)] hover:-translate-y-0.5",
-              sonosConnected 
-                ? "border-[#1db954] bg-[rgba(29,185,84,0.15)]" 
-                : "border-[#1db954]"
+              mode === 'stopwatch' && "invisible"
             )}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </Button>
+          
+          <Button 
+            variant={sonosConnected ? "sonos" : "outline"}
+            size="lg"
             onClick={() => setShowSonosPanel(true)}
           >
-            <Volume2 className="w-5 h-5" />
-            Sonos {sonosConnected && '✓'}
-          </button>
+            <Volume2 className="h-4 w-4 mr-2" />
+            Sonos
+            {sonosConnected && <Check className="h-4 w-4 ml-1" />}
+          </Button>
         </div>
       </div>
 

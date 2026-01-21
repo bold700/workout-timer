@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { Mic } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { duckVolume, restoreVolume, getIsDucked } from '../services/sonosApi';
 
 interface HoldToTalkProps {
@@ -120,15 +121,14 @@ export default function HoldToTalk({
   }
 
   return (
-    <div className="fixed bottom-8 right-8 z-[100] md:bottom-6 md:right-6">
-      <button
+    <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-center gap-2">
+      <Button
+        variant={isHolding ? "work" : "sonos"}
+        size="icon-xl"
         className={cn(
-          "w-20 h-20 rounded-full flex flex-col items-center justify-center gap-1",
-          "transition-all touch-none select-none overflow-visible",
-          "md:w-[70px] md:h-[70px]",
+          "rounded-full h-16 w-16 touch-none",
           isProcessing && "opacity-80 cursor-wait",
-          !isHolding && "bg-gradient-to-br from-[#1db954] to-[#1ed760] shadow-[0_4px_20px_rgba(29,185,84,0.4)] hover:scale-105 hover:shadow-[0_6px_25px_rgba(29,185,84,0.5)]",
-          isHolding && "bg-gradient-to-br from-[#ff6b35] to-[#ff8c42] shadow-[0_2px_15px_rgba(255,107,53,0.6)] scale-95"
+          isHolding && "scale-95"
         )}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
@@ -138,26 +138,14 @@ export default function HoldToTalk({
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
         disabled={!isConnected}
-        aria-label="Houd ingedrukt om muziek zachter te zetten"
-        title="Houd ingedrukt om muziek zachter te zetten"
+        aria-label="Hold to lower music volume"
+        title="Hold to lower music volume"
       >
-        <Mic className="w-8 h-8 text-white md:w-7 md:h-7" />
-        
-        {/* Pulsing ring when active */}
-        {isHolding && (
-          <span className="absolute inset-0 rounded-full border-[3px] border-[rgba(255,107,53,0.6)] animate-ping" />
-        )}
-      </button>
+        <Mic className="h-6 w-6" />
+      </Button>
       
-      {/* Label */}
-      <span className={cn(
-        "absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap",
-        "text-[0.7rem] font-medium uppercase tracking-wide",
-        "md:text-[0.6rem] md:-bottom-6",
-        !isHolding && "text-white/70",
-        isHolding && "text-[#ff6b35]"
-      )}>
-        {isHolding ? 'Aan het praten...' : 'Houd vast om te praten'}
+      <span className="text-xs text-muted-foreground whitespace-nowrap">
+        {isHolding ? 'Talking...' : 'Hold to talk'}
       </span>
     </div>
   );

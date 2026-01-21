@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
 import { Check, X, Loader2 } from 'lucide-react';
 import { handleSonosCallback } from '../services/sonosAuth';
 
@@ -10,7 +10,7 @@ interface SonosCallbackProps {
 
 export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps) {
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
-  const [message, setMessage] = useState('Verbinden met Sonos...');
+  const [message, setMessage] = useState('Connecting to Sonos...');
 
   useEffect(() => {
     const processCallback = async () => {
@@ -21,25 +21,25 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
 
       if (error) {
         setStatus('error');
-        setMessage(`Sonos login geweigerd: ${error}`);
+        setMessage(`Sonos login denied: ${error}`);
         onError(error);
         return;
       }
 
       if (!code || !state) {
         setStatus('error');
-        setMessage('Ongeldige callback - ontbrekende parameters');
+        setMessage('Invalid callback - missing parameters');
         onError('Missing parameters');
         return;
       }
 
-      setMessage('Tokens ophalen...');
+      setMessage('Exchanging tokens...');
 
       const success = await handleSonosCallback(code, state);
 
       if (success) {
         setStatus('success');
-        setMessage('Succesvol verbonden met Sonos!');
+        setMessage('Successfully connected to Sonos!');
         
         window.history.replaceState({}, document.title, window.location.pathname);
         
@@ -48,7 +48,7 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
         }, 1500);
       } else {
         setStatus('error');
-        setMessage('Kon niet verbinden met Sonos. Probeer opnieuw.');
+        setMessage('Could not connect to Sonos. Please try again.');
         onError('Token exchange failed');
       }
     };
@@ -57,32 +57,28 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
   }, [onSuccess, onError]);
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[1000]">
-      <div className="text-center p-12">
-        {status === 'processing' && (
-          <Loader2 className="w-16 h-16 text-[#1db954] mx-auto mb-6 animate-spin" />
-        )}
-        
-        {status === 'success' && (
-          <div className={cn(
-            "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6",
-            "bg-[#1db954] text-white"
-          )}>
-            <Check className="w-8 h-8" />
-          </div>
-        )}
-        
-        {status === 'error' && (
-          <div className={cn(
-            "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6",
-            "bg-red-500 text-white"
-          )}>
-            <X className="w-8 h-8" />
-          </div>
-        )}
-        
-        <p className="text-white text-xl">{message}</p>
-      </div>
+    <div className="fixed inset-0 bg-background flex items-center justify-center">
+      <Card className="w-full max-w-sm mx-4">
+        <CardContent className="flex flex-col items-center py-8 gap-4">
+          {status === 'processing' && (
+            <Loader2 className="h-12 w-12 text-muted-foreground animate-spin" />
+          )}
+          
+          {status === 'success' && (
+            <div className="h-12 w-12 rounded-full bg-[var(--color-sonos)] flex items-center justify-center">
+              <Check className="h-6 w-6 text-white" />
+            </div>
+          )}
+          
+          {status === 'error' && (
+            <div className="h-12 w-12 rounded-full bg-destructive flex items-center justify-center">
+              <X className="h-6 w-6 text-white" />
+            </div>
+          )}
+          
+          <p className="text-center text-sm text-muted-foreground">{message}</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

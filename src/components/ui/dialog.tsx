@@ -1,6 +1,6 @@
 import * as React from "react"
-import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { X } from "lucide-react"
 
 interface DialogProps {
   open: boolean
@@ -10,59 +10,71 @@ interface DialogProps {
 
 const Dialog = ({ open, onOpenChange, children }: DialogProps) => {
   if (!open) return null
-  
+
   return (
-    <div 
-      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
       onClick={() => onOpenChange(false)}
     >
-      {children}
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-black/80" />
+      {/* Content wrapper */}
+      <div className="relative z-50 w-full max-w-lg p-4">
+        {children}
+      </div>
     </div>
   )
 }
 
 const DialogContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, children, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & { onClose?: () => void }
+>(({ className, children, onClose, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "bg-[#1a1a1a] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl",
+      "relative grid w-full gap-4 rounded-lg border bg-background p-6 shadow-lg",
+      "animate-in fade-in-0 zoom-in-95",
       className
     )}
     onClick={(e) => e.stopPropagation()}
     {...props}
   >
     {children}
+    {onClose && (
+      <button
+        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+        onClick={onClose}
+      >
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </button>
+    )}
   </div>
 ))
 DialogContent.displayName = "DialogContent"
 
 const DialogHeader = ({
   className,
-  children,
-  onClose,
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & { onClose?: () => void }) => (
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(
-      "flex items-center justify-between p-5 border-b border-[#333]",
-      className
-    )}
+    className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)}
     {...props}
-  >
-    {children}
-    {onClose && (
-      <button
-        onClick={onClose}
-        className="text-[#888] hover:text-white transition-colors"
-      >
-        <X className="h-6 w-6" />
-      </button>
-    )}
-  </div>
+  />
 )
+DialogHeader.displayName = "DialogHeader"
+
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
+    {...props}
+  />
+)
+DialogFooter.displayName = "DialogFooter"
 
 const DialogTitle = React.forwardRef<
   HTMLHeadingElement,
@@ -70,18 +82,29 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h2
     ref={ref}
-    className={cn("text-xl font-semibold text-white", className)}
+    className={cn("text-lg font-semibold leading-none tracking-tight", className)}
     {...props}
   />
 ))
 DialogTitle.displayName = "DialogTitle"
 
-const DialogBody = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+const DialogDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-5", className)} {...props} />
+  <p
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
 ))
-DialogBody.displayName = "DialogBody"
+DialogDescription.displayName = "DialogDescription"
 
-export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody }
+export {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+}

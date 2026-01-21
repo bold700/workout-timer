@@ -1,59 +1,49 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-primary: #0f0f1e;
-  --color-bg-secondary: #1a1a2e;
-  --color-bg-tertiary: #2d2d44;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a0a0c0;
-  --color-accent: #00d9ff;
-  --color-accent-hover: #00b8d9;
-  --color-work: #ff006e;
-  --color-rest: #00f5a0;
-  --color-success: #00f5a0;
-  --color-warning: #ffbe0b;
-  --color-sonos: #1db954;
-  --color-sonos-hover: #1ed760;
+  /* shadcn/ui dark theme colors */
+  --color-background: hsl(240 10% 3.9%);
+  --color-foreground: hsl(0 0% 98%);
+  --color-card: hsl(240 10% 3.9%);
+  --color-card-foreground: hsl(0 0% 98%);
+  --color-popover: hsl(240 10% 3.9%);
+  --color-popover-foreground: hsl(0 0% 98%);
+  --color-primary: hsl(0 0% 98%);
+  --color-primary-foreground: hsl(240 5.9% 10%);
+  --color-secondary: hsl(240 3.7% 15.9%);
+  --color-secondary-foreground: hsl(0 0% 98%);
+  --color-muted: hsl(240 3.7% 15.9%);
+  --color-muted-foreground: hsl(240 5% 64.9%);
+  --color-accent: hsl(240 3.7% 15.9%);
+  --color-accent-foreground: hsl(0 0% 98%);
+  --color-destructive: hsl(0 62.8% 30.6%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(240 3.7% 15.9%);
+  --color-input: hsl(240 3.7% 15.9%);
+  --color-ring: hsl(240 4.9% 83.9%);
+  
+  /* Workout specific colors */
+  --color-work: hsl(346 100% 50%);
+  --color-rest: hsl(158 100% 48%);
+  --color-sonos: hsl(141 73% 42%);
+  
+  --radius: 0.5rem;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-:root {
-  --bg-primary: #0f0f1e;
-  --bg-secondary: #1a1a2e;
-  --bg-tertiary: #2d2d44;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0c0;
-  --accent: #00d9ff;
-  --accent-hover: #00b8d9;
-  --accent-glow: rgba(0, 217, 255, 0.4);
-  --work: #ff006e;
-  --work-glow: rgba(255, 0, 110, 0.4);
-  --rest: #00f5a0;
-  --rest-glow: rgba(0, 245, 160, 0.4);
-  --success: #00f5a0;
-  --warning: #ffbe0b;
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-accent: linear-gradient(135deg, #00d9ff 0%, #00a8cc 100%);
-  --gradient-work: linear-gradient(135deg, #ff006e 0%, #ff4d9e 100%);
-  --gradient-rest: linear-gradient(135deg, #00f5a0 0%, #00d9a5 100%);
+  border-color: var(--color-border);
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--bg-primary);
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(0, 217, 255, 0.1) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(255, 0, 110, 0.1) 0px, transparent 50%);
-  color: var(--text-primary);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
@@ -67,34 +57,17 @@ body {
   flex-direction: column;
 }
 
+/* Remove default button styles */
 button {
   font-family: inherit;
   cursor: pointer;
   border: none;
   outline: none;
+  background: transparent;
   -webkit-tap-highlight-color: transparent;
 }
 
-button:active {
-  transform: scale(0.95);
-}
-
-input {
-  font-family: inherit;
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 2px solid var(--bg-tertiary);
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 16px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-input:focus {
-  border-color: var(--accent);
-}
-
+/* Remove number input spinners */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
