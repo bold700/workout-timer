@@ -7,7 +7,6 @@ import { Settings, Volume2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ModeSelector from './components/ModeSelector';
 import TimerDisplay from './components/TimerDisplay';
-import ControlButtons from './components/ControlButtons';
 import SettingsPanel from './components/SettingsPanel';
 import SonosPanel, { getDuckLevel } from './components/SonosPanel';
 import SonosCallback from './components/SonosCallback';
@@ -118,6 +117,10 @@ export default function App() {
           <TimerDisplay 
             time={stopwatch.time} 
             mode="stopwatch"
+            isRunning={stopwatch.isRunning}
+            onStart={stopwatch.start}
+            onPause={stopwatch.pause}
+            onReset={stopwatch.reset}
           />
         )}
         
@@ -125,6 +128,10 @@ export default function App() {
           <TimerDisplay 
             time={countdown.time} 
             mode="countdown"
+            isRunning={countdown.isRunning}
+            onStart={countdown.start}
+            onPause={countdown.pause}
+            onReset={countdown.reset}
           />
         )}
         
@@ -136,16 +143,11 @@ export default function App() {
             round={interval.settings.currentRound}
             totalRounds={interval.settings.rounds}
             isRunning={interval.isRunning}
+            onStart={interval.start}
+            onPause={interval.pause}
+            onReset={interval.reset}
           />
         )}
-
-        <ControlButtons
-          isRunning={timer.isRunning}
-          isPaused={timer.isPaused}
-          onStart={timer.start}
-          onPause={timer.pause}
-          onReset={timer.reset}
-        />
 
         {/* Settings buttons */}
         <div className="flex justify-center gap-3 mt-4 flex-wrap px-4">
@@ -185,7 +187,6 @@ export default function App() {
               </Button>
             </DialogTrigger>
             <SonosPanel
-              onClose={() => setShowSonosPanel(false)}
               onConnectionChange={handleSonosConnectionChange}
             />
           </Dialog>
