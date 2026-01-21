@@ -181,7 +181,7 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
   };
 
   return (
-    <DialogContent className="sm:max-w-[400px] overflow-hidden">
+    <DialogContent className="sm:max-w-[400px]">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <Volume2 className="h-5 w-5" />

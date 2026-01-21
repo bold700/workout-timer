@@ -25,7 +25,7 @@ function SelectValue({
   return (
     <SelectPrimitive.Value 
       data-slot="select-value" 
-      className={cn("truncate max-w-[300px]", className)}
+      className={cn("truncate max-w-[300px] w-full justify-start", className)}
       {...props} 
     />
   )
