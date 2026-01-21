@@ -235,6 +235,16 @@
   transform: scale(1.05);
 }
 
+/* Volume slider styling */
+.sonos-volume-slider::-webkit-slider-track {
+  background: linear-gradient(to right, #1db954 0%, #1db954 var(--volume-percent, 50%), #333 var(--volume-percent, 50%), #333 100%);
+}
+
+.sonos-volume-slider::-webkit-slider-thumb {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
 .sonos-volume-display span {
   color: #aaa;
 }

@@ -244,9 +244,27 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
                     </div>
                   </div>
 
-                  <div className="sonos-volume-display">
-                    <span>Huidig volume:</span>
-                    <span className="sonos-volume-value">{currentVolume}%</span>
+                  <div className="sonos-form-group">
+                    <label>
+                      Huidig volume: {currentVolume}%
+                    </label>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      value={currentVolume}
+                      onChange={async (e) => {
+                        const newVolume = parseInt(e.target.value, 10);
+                        setCurrentVolume(newVolume);
+                        await setGroupVolume(newVolume, selectedGroup);
+                      }}
+                      className="sonos-slider sonos-volume-slider"
+                      disabled={!selectedGroup}
+                    />
+                    <div className="sonos-slider-labels">
+                      <span>0%</span>
+                      <span>100%</span>
+                    </div>
                   </div>
 
                   <div className="sonos-playback-controls">
