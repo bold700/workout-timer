@@ -329,9 +329,10 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
       </div>
 
       {connected && (
-        <DialogFooter className="sm:justify-center">
+        <DialogFooter>
           <Button 
             variant="destructive"
+            className="w-full"
             onClick={handleLogout}
           >
             <LogOut className="h-4 w-4" />
