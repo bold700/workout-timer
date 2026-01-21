@@ -13,6 +13,9 @@ import {
   getGroups, 
   getGroupVolume,
   setGroupVolume,
+  skipToNextTrack,
+  skipToPreviousTrack,
+  togglePlayPause,
   SonosHousehold, 
   SonosGroup 
 } from '../services/sonosApi';
@@ -244,6 +247,39 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
                   <div className="sonos-volume-display">
                     <span>Huidig volume:</span>
                     <span className="sonos-volume-value">{currentVolume}%</span>
+                  </div>
+
+                  <div className="sonos-playback-controls">
+                    <button 
+                      className="sonos-playback-btn"
+                      onClick={() => skipToPreviousTrack(selectedGroup)}
+                      disabled={!selectedGroup}
+                      title="Vorig nummer"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                      </svg>
+                    </button>
+                    <button 
+                      className="sonos-playback-btn sonos-play-btn"
+                      onClick={() => togglePlayPause(selectedGroup)}
+                      disabled={!selectedGroup}
+                      title="Play / Pause"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </button>
+                    <button 
+                      className="sonos-playback-btn"
+                      onClick={() => skipToNextTrack(selectedGroup)}
+                      disabled={!selectedGroup}
+                      title="Volgend nummer"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                      </svg>
+                    </button>
                   </div>
 
                   <button 
