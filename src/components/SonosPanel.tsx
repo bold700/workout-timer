@@ -16,6 +16,7 @@ import {
   skipToNextTrack,
   skipToPreviousTrack,
   togglePlayPause,
+  getPlaybackStatus,
   SonosHousehold, 
   SonosGroup 
 } from '../services/sonosApi';
@@ -39,6 +40,7 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
     const saved = localStorage.getItem('sonos_duck_level');
     return saved ? parseInt(saved, 10) : 20;
   });
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
   // Check initial auth state
@@ -106,11 +108,16 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
     }
   }, []);
 
-  // Load current volume
+  // Load current volume and playback status
   const loadVolume = useCallback(async (groupId: string) => {
     const volume = await getGroupVolume(groupId);
     if (volume) {
       setCurrentVolume(volume.volume);
+    }
+    
+    const status = await getPlaybackStatus(groupId);
+    if (status) {
+      setIsPlaying(status.playbackState === 'PLAYBACK_STATE_PLAYING');
     }
   }, []);
 
@@ -280,13 +287,22 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
                     </button>
                     <button 
                       className="sonos-playback-btn sonos-play-btn"
-                      onClick={() => togglePlayPause(selectedGroup)}
+                      onClick={async () => {
+                        await togglePlayPause(selectedGroup);
+                        setIsPlaying(!isPlaying);
+                      }}
                       disabled={!selectedGroup}
-                      title="Play / Pause"
+                      title={isPlaying ? "Pause" : "Play"}
                     >
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
+                      {isPlaying ? (
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      )}
                     </button>
                     <button 
                       className="sonos-playback-btn"

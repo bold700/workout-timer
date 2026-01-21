@@ -230,7 +230,27 @@ export function getIsDucked(): boolean {
   return isDucked;
 }
 
-// Playback controls (bonus)
+// Playback status types
+export interface PlaybackStatus {
+  playbackState: 'PLAYBACK_STATE_PLAYING' | 'PLAYBACK_STATE_PAUSED' | 'PLAYBACK_STATE_IDLE' | 'PLAYBACK_STATE_BUFFERING';
+  isDucking: boolean;
+}
+
+// Get playback status
+export async function getPlaybackStatus(groupId?: string): Promise<PlaybackStatus | null> {
+  const gId = groupId || getGroupId();
+  if (!gId) return null;
+  
+  return sonosApiCall<PlaybackStatus>(`/groups/${gId}/playback`);
+}
+
+// Check if currently playing
+export async function isPlaying(groupId?: string): Promise<boolean> {
+  const status = await getPlaybackStatus(groupId);
+  return status?.playbackState === 'PLAYBACK_STATE_PLAYING';
+}
+
+// Playback controls
 export async function play(groupId?: string): Promise<boolean> {
   const gId = groupId || getGroupId();
   if (!gId) return false;
