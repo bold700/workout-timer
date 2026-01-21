@@ -1,10 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import { Mic } from 'lucide-react';
 import { duckVolume, restoreVolume, getIsDucked } from '../services/sonosApi';
-import './HoldToTalk.css';
 
 interface HoldToTalkProps {
   isConnected: boolean;
-  duckLevel?: number; // Volume level when ducked (0-100), default 20
+  duckLevel?: number;
   onDuckStart?: () => void;
   onDuckEnd?: () => void;
 }
@@ -20,7 +21,6 @@ export default function HoldToTalk({
   const holdTimeoutRef = useRef<number | null>(null);
   const isHoldingRef = useRef(false);
 
-  // Handle press start
   const handlePressStart = useCallback(async () => {
     if (!isConnected || isProcessing) return;
 
@@ -37,7 +37,6 @@ export default function HoldToTalk({
     setIsProcessing(false);
   }, [isConnected, isProcessing, duckLevel, onDuckStart]);
 
-  // Handle press end
   const handlePressEnd = useCallback(async () => {
     if (!isHoldingRef.current) return;
 
@@ -54,7 +53,6 @@ export default function HoldToTalk({
     setIsProcessing(false);
   }, [onDuckEnd]);
 
-  // Mouse events
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     handlePressStart();
@@ -71,7 +69,6 @@ export default function HoldToTalk({
     }
   }, [handlePressEnd]);
 
-  // Touch events
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     handlePressStart();
@@ -82,7 +79,6 @@ export default function HoldToTalk({
     handlePressEnd();
   }, [handlePressEnd]);
 
-  // Keyboard support (space bar)
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.code === 'Space' && !e.repeat) {
       e.preventDefault();
@@ -97,20 +93,17 @@ export default function HoldToTalk({
     }
   }, [handlePressEnd]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (holdTimeoutRef.current) {
         clearTimeout(holdTimeoutRef.current);
       }
-      // Restore volume if component unmounts while holding
       if (getIsDucked()) {
         restoreVolume();
       }
     };
   }, []);
 
-  // Handle window blur (user switches app while holding)
   useEffect(() => {
     const handleBlur = () => {
       if (isHoldingRef.current) {
@@ -127,29 +120,45 @@ export default function HoldToTalk({
   }
 
   return (
-    <button
-      className={`hold-to-talk ${isHolding ? 'active' : ''} ${isProcessing ? 'processing' : ''}`}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-      disabled={!isConnected}
-      aria-label="Houd ingedrukt om muziek zachter te zetten"
-      title="Houd ingedrukt om muziek zachter te zetten"
-    >
-      <div className="hold-to-talk-icon">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/>
-          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-        </svg>
-      </div>
-      <span className="hold-to-talk-label">
+    <div className="fixed bottom-8 right-8 z-[100] md:bottom-6 md:right-6">
+      <button
+        className={cn(
+          "w-20 h-20 rounded-full flex flex-col items-center justify-center gap-1",
+          "transition-all touch-none select-none overflow-visible",
+          "md:w-[70px] md:h-[70px]",
+          isProcessing && "opacity-80 cursor-wait",
+          !isHolding && "bg-gradient-to-br from-[#1db954] to-[#1ed760] shadow-[0_4px_20px_rgba(29,185,84,0.4)] hover:scale-105 hover:shadow-[0_6px_25px_rgba(29,185,84,0.5)]",
+          isHolding && "bg-gradient-to-br from-[#ff6b35] to-[#ff8c42] shadow-[0_2px_15px_rgba(255,107,53,0.6)] scale-95"
+        )}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
+        disabled={!isConnected}
+        aria-label="Houd ingedrukt om muziek zachter te zetten"
+        title="Houd ingedrukt om muziek zachter te zetten"
+      >
+        <Mic className="w-8 h-8 text-white md:w-7 md:h-7" />
+        
+        {/* Pulsing ring when active */}
+        {isHolding && (
+          <span className="absolute inset-0 rounded-full border-[3px] border-[rgba(255,107,53,0.6)] animate-ping" />
+        )}
+      </button>
+      
+      {/* Label */}
+      <span className={cn(
+        "absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap",
+        "text-[0.7rem] font-medium uppercase tracking-wide",
+        "md:text-[0.6rem] md:-bottom-6",
+        !isHolding && "text-white/70",
+        isHolding && "text-[#ff6b35]"
+      )}>
         {isHolding ? 'Aan het praten...' : 'Houd vast om te praten'}
       </span>
-      <div className="hold-to-talk-ring" />
-    </button>
+    </div>
   );
 }

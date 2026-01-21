@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { Check, X, Loader2 } from 'lucide-react';
 import { handleSonosCallback } from '../services/sonosAuth';
-import './SonosCallback.css';
 
 interface SonosCallbackProps {
   onSuccess: () => void;
@@ -40,10 +41,8 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
         setStatus('success');
         setMessage('Succesvol verbonden met Sonos!');
         
-        // Clean up URL
         window.history.replaceState({}, document.title, window.location.pathname);
         
-        // Wait a moment then redirect
         setTimeout(() => {
           onSuccess();
         }, 1500);
@@ -58,21 +57,31 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
   }, [onSuccess, onError]);
 
   return (
-    <div className="sonos-callback">
-      <div className="sonos-callback-content">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[1000]">
+      <div className="text-center p-12">
         {status === 'processing' && (
-          <div className="sonos-callback-spinner" />
+          <Loader2 className="w-16 h-16 text-[#1db954] mx-auto mb-6 animate-spin" />
         )}
         
         {status === 'success' && (
-          <div className="sonos-callback-icon success">✓</div>
+          <div className={cn(
+            "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6",
+            "bg-[#1db954] text-white"
+          )}>
+            <Check className="w-8 h-8" />
+          </div>
         )}
         
         {status === 'error' && (
-          <div className="sonos-callback-icon error">✕</div>
+          <div className={cn(
+            "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6",
+            "bg-red-500 text-white"
+          )}>
+            <X className="w-8 h-8" />
+          </div>
         )}
         
-        <p className="sonos-callback-message">{message}</p>
+        <p className="text-white text-xl">{message}</p>
       </div>
     </div>
   );

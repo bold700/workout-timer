@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { TimerMode } from './types';
 import { useStopwatch, useCountdown, useIntervalTimer } from './hooks/useTimer';
+import { cn } from '@/lib/utils';
+import { Settings, Volume2 } from 'lucide-react';
 import ModeSelector from './components/ModeSelector';
 import TimerDisplay from './components/TimerDisplay';
 import ControlButtons from './components/ControlButtons';
@@ -9,7 +11,6 @@ import SonosPanel, { getDuckLevel } from './components/SonosPanel';
 import SonosCallback from './components/SonosCallback';
 import HoldToTalk from './components/HoldToTalk';
 import { isAuthenticated } from './services/sonosAuth';
-import './App.css';
 
 export default function App() {
   const [mode, setMode] = useState<TimerMode>('stopwatch');
@@ -20,33 +21,26 @@ export default function App() {
   const [countdownSettings, setCountdownSettings] = useState({ minutes: 3, seconds: 0 });
   const [intervalSettings, setIntervalSettings] = useState({ workTime: 30, restTime: 10, rounds: 8 });
 
-  // Check for OAuth callback on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('code') || urlParams.has('error')) {
       setIsCallback(true);
     }
-    
-    // Check if already authenticated
     setSonosConnected(isAuthenticated());
   }, []);
 
-  // Handle successful OAuth callback
   const handleCallbackSuccess = useCallback(() => {
     setIsCallback(false);
     setSonosConnected(true);
-    // Navigate to clean URL
     window.history.replaceState({}, document.title, window.location.pathname);
   }, []);
 
-  // Handle OAuth callback error
   const handleCallbackError = useCallback((error: string) => {
     setIsCallback(false);
     console.error('Sonos auth error:', error);
     window.history.replaceState({}, document.title, window.location.pathname);
   }, []);
 
-  // Handle Sonos connection change
   const handleSonosConnectionChange = useCallback((connected: boolean) => {
     setSonosConnected(connected);
   }, []);
@@ -67,7 +61,6 @@ export default function App() {
   };
 
   const handleModeChange = (newMode: TimerMode) => {
-    // Reset all timers when changing mode
     stopwatch.reset();
     countdown.reset();
     interval.reset();
@@ -101,7 +94,6 @@ export default function App() {
   const timer = getCurrentTimer();
   const isRunning = timer.isRunning || false;
 
-  // Show callback screen if processing OAuth
   if (isCallback) {
     return (
       <SonosCallback 
@@ -112,14 +104,14 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className="flex flex-col h-screen w-screen bg-[var(--bg-primary)] overflow-hidden">
       <ModeSelector 
         currentMode={mode} 
         onModeChange={handleModeChange}
         isRunning={isRunning}
       />
       
-      <div className="app-content">
+      <div className="flex flex-col flex-1 min-h-0 pb-5">
         {mode === 'stopwatch' && (
           <TimerDisplay 
             time={stopwatch.time} 
@@ -153,21 +145,37 @@ export default function App() {
           onReset={timer.reset}
         />
 
-        <div className="settings-buttons">
+        {/* Settings buttons */}
+        <div className="flex justify-center gap-3 mt-4 flex-wrap">
           <button 
-            className={`settings-btn ${mode === 'stopwatch' ? 'settings-btn-hidden' : ''}`}
+            className={cn(
+              "px-6 py-3 text-base font-semibold rounded-lg flex items-center gap-2 transition-all",
+              "bg-[var(--bg-tertiary)] text-white border-2 border-[var(--bg-tertiary)]",
+              "hover:bg-[var(--bg-secondary)] hover:border-[var(--accent)] hover:shadow-[0_0_15px_rgba(0,217,255,0.2)] hover:-translate-y-0.5",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              mode === 'stopwatch' && "invisible pointer-events-none"
+            )}
             onClick={() => setShowSettings(true)}
             disabled={isRunning || mode === 'stopwatch'}
             aria-hidden={mode === 'stopwatch'}
           >
-            ⚙️ Timer
+            <Settings className="w-5 h-5" />
+            Timer
           </button>
           
           <button 
-            className={`settings-btn sonos-settings-btn ${sonosConnected ? 'connected' : ''}`}
+            className={cn(
+              "px-6 py-3 text-base font-semibold rounded-lg flex items-center gap-2 transition-all",
+              "bg-[var(--bg-tertiary)] text-white border-2",
+              "hover:shadow-[0_0_15px_rgba(29,185,84,0.3)] hover:-translate-y-0.5",
+              sonosConnected 
+                ? "border-[#1db954] bg-[rgba(29,185,84,0.15)]" 
+                : "border-[#1db954]"
+            )}
             onClick={() => setShowSonosPanel(true)}
           >
-            🔊 Sonos {sonosConnected ? '✓' : ''}
+            <Volume2 className="w-5 h-5" />
+            Sonos {sonosConnected && '✓'}
           </button>
         </div>
       </div>
