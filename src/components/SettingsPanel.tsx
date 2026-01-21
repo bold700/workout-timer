@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { TimerMode } from '../types';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter 
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -74,7 +80,7 @@ export default function SettingsPanel({ mode, isVisible, onClose, onSave, curren
 
   return (
     <Dialog open={isVisible} onOpenChange={onClose}>
-      <DialogContent onClose={onClose} className="sm:max-w-[400px]">
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>Timer Settings</DialogTitle>
         </DialogHeader>

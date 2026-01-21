@@ -1,8 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Select } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { SkipBack, Play, Pause, SkipForward, Volume2, LogOut } from 'lucide-react';
 import { 
   isAuthenticated, 
@@ -143,9 +155,16 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
     await loadVolume(groupId);
   };
 
-  const handleDuckLevelChange = (level: number) => {
+  const handleDuckLevelChange = (value: number[]) => {
+    const level = value[0];
     setDuckLevel(level);
     localStorage.setItem('sonos_duck_level', level.toString());
+  };
+
+  const handleVolumeChange = async (value: number[]) => {
+    const newVolume = value[0];
+    setCurrentVolume(newVolume);
+    await setGroupVolume(newVolume, selectedGroup);
   };
 
   const handleVolumeTest = async () => {
@@ -161,7 +180,7 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
 
   return (
     <Dialog open={isVisible} onOpenChange={onClose}>
-      <DialogContent onClose={onClose} className="sm:max-w-[400px]">
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Volume2 className="h-5 w-5" />
@@ -194,40 +213,51 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
 
               {!loading && households.length > 0 && (
                 <>
-                  <Select
-                    label="Household"
-                    value={selectedHousehold} 
-                    onChange={e => handleHouseholdChange(e.target.value)}
-                  >
-                    {households.map(h => (
-                      <option key={h.id} value={h.id}>{h.name || h.id}</option>
-                    ))}
-                  </Select>
-
-                  {groups.length > 0 && (
-                    <Select
-                      label="Speaker / Group"
-                      value={selectedGroup} 
-                      onChange={e => handleGroupChange(e.target.value)}
-                    >
-                      {groups.map(g => (
-                        <option key={g.id} value={g.id}>{g.name}</option>
-                      ))}
+                  {/* Household selector */}
+                  <div className="grid gap-2">
+                    <Label>Household</Label>
+                    <Select value={selectedHousehold} onValueChange={handleHouseholdChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select household" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {households.map(h => (
+                          <SelectItem key={h.id} value={h.id}>
+                            {h.name || h.id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
+                  </div>
+
+                  {/* Group selector */}
+                  {groups.length > 0 && (
+                    <div className="grid gap-2">
+                      <Label>Speaker / Group</Label>
+                      <Select value={selectedGroup} onValueChange={handleGroupChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select speaker" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {groups.map(g => (
+                            <SelectItem key={g.id} value={g.id}>
+                              {g.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
 
                   {/* Volume control */}
                   <div className="grid gap-2">
+                    <Label>Current Volume: {currentVolume}%</Label>
                     <Slider
-                      label={`Current Volume: ${currentVolume}%`}
+                      value={[currentVolume]}
+                      onValueChange={handleVolumeChange}
                       min={0}
                       max={100}
-                      value={currentVolume}
-                      onChange={async (e) => {
-                        const newVolume = parseInt(e.target.value, 10);
-                        setCurrentVolume(newVolume);
-                        await setGroupVolume(newVolume, selectedGroup);
-                      }}
+                      step={1}
                       disabled={!selectedGroup}
                     />
                   </div>
@@ -265,12 +295,13 @@ export default function SonosPanel({ isVisible, onClose, onConnectionChange }: S
 
                   {/* Duck level */}
                   <div className="grid gap-2">
+                    <Label>Volume while talking: {duckLevel}%</Label>
                     <Slider
-                      label={`Volume while talking: ${duckLevel}%`}
+                      value={[duckLevel]}
+                      onValueChange={handleDuckLevelChange}
                       min={0}
                       max={50}
-                      value={duckLevel}
-                      onChange={e => handleDuckLevelChange(parseInt(e.target.value, 10))}
+                      step={1}
                     />
                   </div>
 

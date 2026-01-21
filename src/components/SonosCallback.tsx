@@ -65,7 +65,7 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
           )}
           
           {status === 'success' && (
-            <div className="h-12 w-12 rounded-full bg-[var(--color-sonos)] flex items-center justify-center">
+            <div className="h-12 w-12 rounded-full bg-sonos flex items-center justify-center">
               <Check className="h-6 w-6 text-white" />
             </div>
           )}
