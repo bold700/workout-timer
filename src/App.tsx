@@ -150,21 +150,23 @@ export default function App() {
 
         {/* Settings buttons */}
         <div className="flex justify-center gap-3 mt-4 flex-wrap px-4">
-          {/* Timer Settings Dialog */}
-          <Dialog open={showSettings} onOpenChange={setShowSettings}>
-            <DialogTrigger asChild>
-              <Button variant="ghost">
-                <Settings className="h-4 w-4" />
-                Settings
-              </Button>
-            </DialogTrigger>
-            <SettingsPanel
-              mode={mode}
-              onClose={() => setShowSettings(false)}
-              onSave={handleSettingsSave}
-              currentSettings={getCurrentSettings()}
-            />
-          </Dialog>
+          {/* Timer Settings Dialog - only show for countdown and interval modes */}
+          {mode !== 'stopwatch' && (
+            <Dialog open={showSettings} onOpenChange={setShowSettings}>
+              <DialogTrigger asChild>
+                <Button variant="ghost">
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Button>
+              </DialogTrigger>
+              <SettingsPanel
+                mode={mode}
+                onClose={() => setShowSettings(false)}
+                onSave={handleSettingsSave}
+                currentSettings={getCurrentSettings()}
+              />
+            </Dialog>
+          )}
           
           {/* Sonos Dialog */}
           <Dialog open={showSonosPanel} onOpenChange={setShowSonosPanel}>
