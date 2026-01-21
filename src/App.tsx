@@ -169,7 +169,7 @@ export default function App() {
           {/* Sonos Dialog */}
           <Dialog open={showSonosPanel} onOpenChange={setShowSonosPanel}>
             <DialogTrigger asChild>
-              <Button variant="ghost" className="px-3">
+              <Button variant="ghost" className="!px-3">
                 <Volume2 className="h-4 w-4" />
                 Sonos
               </Button>
