@@ -181,7 +181,7 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
   };
 
   return (
-    <DialogContent className="sm:max-w-[400px]">
+    <DialogContent className="sm:max-w-[400px] overflow-hidden">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <Volume2 className="h-5 w-5" />
@@ -195,11 +195,11 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
         </DialogDescription>
       </DialogHeader>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 min-w-0">
         {!connected ? (
           <div className="flex flex-col items-center gap-4 py-4">
             <Volume2 className="h-12 w-12 text-muted-foreground" />
-            <Button variant="sonos" onClick={handleLogin} className="w-full">
+            <Button onClick={handleLogin} className="w-full">
               Connect to Sonos
             </Button>
           </div>
@@ -220,17 +220,17 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
             )}
 
             {!loading && households.length > 0 && (
-              <div className="grid gap-4">
+              <div className="grid gap-4 min-w-0">
                 {/* Household selector */}
-                <div className="grid gap-2">
+                <div className="grid gap-2 min-w-0">
                   <Label htmlFor="household">Household</Label>
                   <Select value={selectedHousehold} onValueChange={handleHouseholdChange}>
-                    <SelectTrigger id="household">
+                    <SelectTrigger id="household" className="w-full">
                       <SelectValue placeholder="Select household" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="max-w-[var(--radix-select-trigger-width)]">
                       {households.map(h => (
-                        <SelectItem key={h.id} value={h.id}>
+                        <SelectItem key={h.id} value={h.id} className="truncate">
                           {h.name || h.id}
                         </SelectItem>
                       ))}
@@ -240,13 +240,13 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
 
                 {/* Group selector */}
                 {groups.length > 0 && (
-                  <div className="grid gap-2">
+                  <div className="grid gap-2 min-w-0">
                     <Label htmlFor="speaker">Speaker / Group</Label>
                     <Select value={selectedGroup} onValueChange={handleGroupChange}>
-                      <SelectTrigger id="speaker">
+                      <SelectTrigger id="speaker" className="w-full">
                         <SelectValue placeholder="Select speaker" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {groups.map(g => (
                           <SelectItem key={g.id} value={g.id}>
                             {g.name}
@@ -273,31 +273,30 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
                 {/* Playback controls */}
                 <div className="flex justify-center items-center gap-2">
                   <Button 
-                    variant="secondary"
-                    size="icon-lg"
+                    variant="outline"
+                    size="icon"
                     onClick={() => skipToPreviousTrack(selectedGroup)}
                     disabled={!selectedGroup}
                   >
-                    <SkipBack className="h-5 w-5" />
+                    <SkipBack className="h-4 w-4" />
                   </Button>
                   <Button 
-                    variant="sonos"
-                    size="icon-xl"
+                    size="icon-lg"
                     onClick={async () => {
                       await togglePlayPause(selectedGroup);
                       setIsPlaying(!isPlaying);
                     }}
                     disabled={!selectedGroup}
                   >
-                    {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
+                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                   </Button>
                   <Button 
-                    variant="secondary"
-                    size="icon-lg"
+                    variant="outline"
+                    size="icon"
                     onClick={() => skipToNextTrack(selectedGroup)}
                     disabled={!selectedGroup}
                   >
-                    <SkipForward className="h-5 w-5" />
+                    <SkipForward className="h-4 w-4" />
                   </Button>
                 </div>
 

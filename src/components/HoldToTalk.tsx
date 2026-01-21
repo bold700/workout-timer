@@ -123,10 +123,10 @@ export default function HoldToTalk({
   return (
     <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-center gap-2">
       <Button
-        variant={isHolding ? "work" : "sonos"}
-        size="icon-xl"
+        variant={isHolding ? "destructive" : "default"}
+        size="icon-lg"
         className={cn(
-          "rounded-full h-16 w-16 touch-none",
+          "rounded-full h-14 w-14 touch-none",
           isProcessing && "opacity-80 cursor-wait",
           isHolding && "scale-95"
         )}
@@ -141,7 +141,7 @@ export default function HoldToTalk({
         aria-label="Hold to lower music volume"
         title="Hold to lower music volume"
       >
-        <Mic className="h-6 w-6" />
+        <Mic className="h-5 w-5" />
       </Button>
       
       <span className="text-xs text-muted-foreground whitespace-nowrap">

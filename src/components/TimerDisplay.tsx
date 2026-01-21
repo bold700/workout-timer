@@ -63,29 +63,29 @@ export default function TimerDisplay({
         <div className="flex gap-4 justify-center flex-wrap mt-4">
           <Button 
             variant="default"
-            size="xxl"
-            className="min-w-[160px] gap-3"
+            size="lg"
+            className="min-w-[140px] gap-2"
             onClick={isRunning ? onPause : onStart}
           >
             {isRunning ? (
               <>
-                <Pause className="h-5 w-5" />
+                <Pause className="h-4 w-4" />
                 PAUSE
               </>
             ) : (
               <>
-                <Play className="h-5 w-5" />
+                <Play className="h-4 w-4" />
                 START
               </>
             )}
           </Button>
           <Button 
             variant="secondary"
-            size="xxl"
-            className="min-w-[160px] gap-3"
+            size="lg"
+            className="min-w-[140px] gap-2"
             onClick={onReset}
           >
-            <RotateCcw className="h-5 w-5" />
+            <RotateCcw className="h-4 w-4" />
             RESET
           </Button>
         </div>
