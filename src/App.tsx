@@ -3,6 +3,8 @@ import { TimerMode } from './types';
 import { useStopwatch, useCountdown, useIntervalTimer } from './hooks/useTimer';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { BottomSheet, BottomSheetTrigger } from '@/components/ui/bottom-sheet';
+import { SideSheet, SideSheetTrigger } from '@/components/ui/side-sheet';
 import { Settings, Volume2 } from 'lucide-react';
 import ModeSelector from './components/ModeSelector';
 import TimerDisplay from './components/TimerDisplay';
@@ -13,6 +15,7 @@ import HoldToTalk from './components/HoldToTalk';
 import { isAuthenticated } from './services/sonosAuth';
 import { timerNotificationService } from './services/timerNotification';
 import { nativeAudioDuckingService } from './services/nativeAudioDucking';
+import { useIsMobile } from './hooks/useIsMobile';
 
 export default function App() {
   const [mode, setMode] = useState<TimerMode>('stopwatch');
@@ -22,6 +25,7 @@ export default function App() {
   const [isCallback, setIsCallback] = useState(false);
   const [countdownSettings, setCountdownSettings] = useState({ minutes: 3, seconds: 0 });
   const [intervalSettings, setIntervalSettings] = useState({ workTime: 30, restTime: 10, rounds: 8 });
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -239,18 +243,34 @@ export default function App() {
             </Dialog>
           )}
           
-          {/* Sonos Dialog */}
-          <Dialog open={showSonosPanel} onOpenChange={setShowSonosPanel}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" className="!px-3">
-                <Volume2 className="h-4 w-4" />
-                Sonos
-              </Button>
-            </DialogTrigger>
-            <SonosPanel
-              onConnectionChange={handleSonosConnectionChange}
-            />
-          </Dialog>
+          {/* Sonos Bottom Sheet (mobile) / Side Sheet (desktop) */}
+          {isMobile ? (
+            <BottomSheet open={showSonosPanel} onOpenChange={setShowSonosPanel}>
+              <BottomSheetTrigger asChild>
+                <Button variant="ghost" className="!px-3">
+                  <Volume2 className="h-4 w-4" />
+                  Sonos
+                </Button>
+              </BottomSheetTrigger>
+              <SonosPanel
+                onConnectionChange={handleSonosConnectionChange}
+                isMobile={true}
+              />
+            </BottomSheet>
+          ) : (
+            <SideSheet open={showSonosPanel} onOpenChange={setShowSonosPanel}>
+              <SideSheetTrigger asChild>
+                <Button variant="ghost" className="!px-3">
+                  <Volume2 className="h-4 w-4" />
+                  Sonos
+                </Button>
+              </SideSheetTrigger>
+              <SonosPanel
+                onConnectionChange={handleSonosConnectionChange}
+                isMobile={false}
+              />
+            </SideSheet>
+          )}
         </div>
       </div>
 

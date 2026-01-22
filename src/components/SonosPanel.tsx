@@ -1,11 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
+import {
+  BottomSheetContent,
+  BottomSheetHeader,
+  BottomSheetTitle,
+  BottomSheetDescription,
+  BottomSheetFooter
+} from '@/components/ui/bottom-sheet';
+import {
+  SideSheetContent,
+  SideSheetHeader,
+  SideSheetTitle,
+  SideSheetDescription,
+  SideSheetFooter
+} from '@/components/ui/side-sheet';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -45,9 +52,10 @@ import { nativeAudioDuckingService } from '../services/nativeAudioDucking';
 interface SonosPanelProps {
   onClose?: () => void;
   onConnectionChange: (connected: boolean) => void;
+  isMobile?: boolean;
 }
 
-export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
+export default function SonosPanel({ onConnectionChange, isMobile = false }: SonosPanelProps) {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [households, setHouseholds] = useState<SonosHousehold[]>([]);
@@ -197,20 +205,28 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
     }, 2000);
   };
 
+  // Kies de juiste componenten op basis van mobile/desktop
+  // Mobile: BottomSheet, Desktop: SideSheet
+  const Content = isMobile ? BottomSheetContent : SideSheetContent;
+  const Header = isMobile ? BottomSheetHeader : SideSheetHeader;
+  const Title = isMobile ? BottomSheetTitle : SideSheetTitle;
+  const Description = isMobile ? BottomSheetDescription : SideSheetDescription;
+  const Footer = isMobile ? BottomSheetFooter : SideSheetFooter;
+
   return (
-    <DialogContent className="sm:max-w-[400px]">
-      <DialogHeader>
-        <DialogTitle className="flex items-center gap-2">
+    <Content className={isMobile ? "" : ""}>
+      <Header>
+        <Title className="flex items-center gap-2">
           <Volume2 className="h-5 w-5" />
           Sonos Settings
-        </DialogTitle>
-        <DialogDescription>
+        </Title>
+        <Description>
           {connected 
             ? "Control your Sonos speakers and adjust volume settings."
             : "Connect with Sonos to control your music during workouts, or adjust device volume settings for Bluetooth/phone speakers."
           }
-        </DialogDescription>
-      </DialogHeader>
+        </Description>
+      </Header>
 
       <div className="grid gap-4 min-w-0">
         {!connected ? (
@@ -385,7 +401,7 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
       </div>
 
       {connected && (
-        <DialogFooter>
+        <Footer>
           <Button 
             variant="destructive"
             className="w-full"
@@ -394,9 +410,9 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
             <LogOut className="h-4 w-4" />
             Disconnect Sonos
           </Button>
-        </DialogFooter>
+        </Footer>
       )}
-    </DialogContent>
+    </Content>
   );
 }
 
