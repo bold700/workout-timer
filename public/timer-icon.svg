@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Zwarte achtergrond -->
+  <rect width="512" height="512" fill="#000000" rx="90"/>
+  
+  <!-- Witte timer icon -->
+  <g fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Buitenste cirkel -->
+    <circle cx="256" cy="256" r="180"/>
+    
+    <!-- Binnenste cirkel voor de timer -->
+    <circle cx="256" cy="256" r="140" opacity="0.3"/>
+    
+    <!-- Timer wijzers -->
+    <!-- Lange wijzer (minuten) -->
+    <line x1="256" y1="256" x2="256" y2="140" stroke-width="20"/>
+    <!-- Korte wijzer (uren) -->
+    <line x1="256" y1="256" x2="320" y2="200" stroke-width="24"/>
+    
+    <!-- Punt in het midden -->
+    <circle cx="256" cy="256" r="16" fill="#ffffff"/>
+    
+    <!-- Markeringen op de klok -->
+    <line x1="256" y1="80" x2="256" y2="100" stroke-width="12"/>
+    <line x1="432" y1="256" x2="412" y2="256" stroke-width="12"/>
+    <line x1="256" y1="432" x2="256" y2="412" stroke-width="12"/>
+    <line x1="80" y1="256" x2="100" y2="256" stroke-width="12"/>
+  </g>
+</svg>

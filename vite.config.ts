@@ -15,15 +15,15 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    VitePWA({
+      VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', '404.html'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'timer-icon.svg', '404.html'],
       manifest: {
         name: 'Workout Timer - Boxing & Kickboxing',
         short_name: 'Workout Timer',
         description: 'Professional timer app for kickboxing and boxing trainers',
-        theme_color: '#1a1a1a',
-        background_color: '#1a1a1a',
+        theme_color: '#000000',
+        background_color: '#000000',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
