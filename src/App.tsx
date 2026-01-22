@@ -11,6 +11,7 @@ import SonosPanel, { getDuckLevel } from './components/SonosPanel';
 import SonosCallback from './components/SonosCallback';
 import HoldToTalk from './components/HoldToTalk';
 import { isAuthenticated } from './services/sonosAuth';
+import { timerNotificationService } from './services/timerNotification';
 
 export default function App() {
   const [mode, setMode] = useState<TimerMode>('stopwatch');
@@ -94,6 +95,74 @@ export default function App() {
   const timer = getCurrentTimer();
   const isRunning = timer.isRunning || false;
 
+  // Sync timer status met notifications voor Dynamic Island / Lock Screen
+  useEffect(() => {
+    if (!isRunning) {
+      timerNotificationService.stop();
+      return;
+    }
+
+    // Start notification
+    const getNotificationState = (): import('./services/timerNotification').TimerNotificationState => {
+      const baseState: import('./services/timerNotification').TimerNotificationState = {
+        mode,
+        isRunning: true,
+        time: timer.time,
+      };
+
+      if (mode === 'interval' && 'settings' in timer) {
+        const intervalSettings = timer.settings as { isWorkPhase: boolean; currentRound: number; rounds: number };
+        return {
+          ...baseState,
+          phase: (intervalSettings.isWorkPhase ? 'work' : 'rest') as 'work' | 'rest',
+          round: intervalSettings.currentRound,
+          totalRounds: intervalSettings.rounds,
+        };
+      }
+
+      return baseState;
+    };
+
+    timerNotificationService.start(getNotificationState());
+
+    // Update notification elke seconde
+    const updateInterval = setInterval(() => {
+      const currentTimer = getCurrentTimer();
+      const baseNotificationState = {
+        mode,
+        isRunning: true,
+        time: currentTimer.time,
+      };
+      
+      let notificationState: typeof baseNotificationState & { phase?: 'work' | 'rest'; round?: number; totalRounds?: number };
+      
+      if (mode === 'interval' && 'settings' in currentTimer) {
+        const intervalSettings = currentTimer.settings as { isWorkPhase: boolean; currentRound: number; rounds: number };
+        notificationState = {
+          ...baseNotificationState,
+          phase: intervalSettings.isWorkPhase ? 'work' : 'rest',
+          round: intervalSettings.currentRound,
+          totalRounds: intervalSettings.rounds,
+        };
+      } else {
+        notificationState = baseNotificationState;
+      }
+      
+      timerNotificationService.update(notificationState);
+    }, 1000);
+
+    return () => {
+      clearInterval(updateInterval);
+    };
+  }, [mode, isRunning]);
+
+  // Cleanup bij unmount
+  useEffect(() => {
+    return () => {
+      timerNotificationService.stop();
+    };
+  }, []);
+
   if (isCallback) {
     return (
       <SonosCallback 
@@ -104,7 +173,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden pt-10 pb-10">
+    <div className="flex flex-col h-screen w-screen overflow-hidden pt-5 pb-10">
       <ModeSelector 
         currentMode={mode} 
         onModeChange={handleModeChange}
