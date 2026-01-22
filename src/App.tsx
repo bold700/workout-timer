@@ -12,6 +12,7 @@ import SonosCallback from './components/SonosCallback';
 import HoldToTalk from './components/HoldToTalk';
 import { isAuthenticated } from './services/sonosAuth';
 import { timerNotificationService } from './services/timerNotification';
+import { nativeAudioDuckingService } from './services/nativeAudioDucking';
 
 export default function App() {
   const [mode, setMode] = useState<TimerMode>('stopwatch');
@@ -160,6 +161,7 @@ export default function App() {
   useEffect(() => {
     return () => {
       timerNotificationService.stop();
+      nativeAudioDuckingService.restoreVolume();
     };
   }, []);
 
@@ -253,8 +255,9 @@ export default function App() {
       </div>
 
       <HoldToTalk 
-        isConnected={sonosConnected}
+        isConnected={true}
         duckLevel={getDuckLevel()}
+        sonosConnected={sonosConnected}
       />
     </div>
   );

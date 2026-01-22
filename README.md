@@ -47,17 +47,41 @@ De app is beschikbaar op: https://bold700.github.io/workout-timer/
 
 ## Mobile App Release
 
+De app gebruikt **Capacitor** voor native iOS en Android builds. In de native app werkt volume ducking voor alle audio (Spotify, YouTube, etc.)!
+
+### Vereisten
+
+- Node.js 20+
+- Xcode (voor iOS)
+- Android Studio (voor Android)
+
 ### iOS (App Store)
 
-1. Build de app met `npm run build`
-2. Gebruik een tool zoals [Capacitor](https://capacitorjs.com/) of [Cordova](https://cordova.apache.org/) om een native iOS app te maken
-3. Of gebruik [PWA Builder](https://www.pwabuilder.com/) om een iOS app te genereren
+1. Build de web app: `npm run build`
+2. Sync met Capacitor: `npx cap sync ios`
+3. Open in Xcode: `npx cap open ios`
+4. Configureer je app ID en signing in Xcode
+5. Build en test in Xcode
+6. Submit naar App Store via Xcode
+
+**Belangrijk:** De native iOS app kan het volume van andere apps tijdelijk verlagen via AVAudioSession ducking.
 
 ### Android (Play Store)
 
-1. Build de app met `npm run build`
-2. Gebruik [Capacitor](https://capacitorjs.com/) of [Cordova](https://cordova.apache.org/) om een native Android app te maken
-3. Of gebruik [PWA Builder](https://www.pwabuilder.com/) om een Android app te genereren
+1. Build de web app: `npm run build`
+2. Sync met Capacitor: `npx cap sync android`
+3. Open in Android Studio: `npx cap open android`
+4. Configureer je app in Android Studio
+5. Build en test in Android Studio
+6. Generate signed APK/AAB voor Play Store
+
+**Belangrijk:** De native Android app kan het volume van andere apps tijdelijk verlagen via AudioFocus ducking.
+
+### Native Features
+
+- ✅ **Volume Ducking**: Werkt voor alle audio (Spotify, YouTube, Apple Music, etc.)
+- ✅ **Hold to Talk**: Verlaagt automatisch alle audio tijdens het praten
+- ✅ **Sonos Integratie**: Werkt ook in native apps
 
 ## PWA Installatie
 

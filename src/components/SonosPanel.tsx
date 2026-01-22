@@ -40,6 +40,7 @@ import {
   SonosHousehold, 
   SonosGroup 
 } from '../services/sonosApi';
+import { nativeAudioDuckingService } from '../services/nativeAudioDucking';
 
 interface SonosPanelProps {
   onClose?: () => void;
@@ -57,6 +58,9 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
   const [duckLevel, setDuckLevel] = useState<number>(() => {
     const saved = localStorage.getItem('sonos_duck_level');
     return saved ? parseInt(saved, 10) : 20;
+  });
+  const [deviceDuckLevel, setDeviceDuckLevel] = useState<number>(() => {
+    return nativeAudioDuckingService.getDuckLevel();
   });
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -163,6 +167,19 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
     localStorage.setItem('sonos_duck_level', level.toString());
   };
 
+  const handleDeviceDuckLevelChange = (value: number[]) => {
+    const level = value[0] / 100; // Convert percentage to 0-1 range
+    setDeviceDuckLevel(level);
+    nativeAudioDuckingService.setDuckLevel(level);
+  };
+
+  const handleDeviceVolumeTest = async () => {
+    await nativeAudioDuckingService.duckVolume();
+    setTimeout(async () => {
+      await nativeAudioDuckingService.restoreVolume();
+    }, 2000);
+  };
+
   const handleVolumeChange = async (value: number[]) => {
     const newVolume = value[0];
     setCurrentVolume(newVolume);
@@ -190,7 +207,7 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
         <DialogDescription>
           {connected 
             ? "Control your Sonos speakers and adjust volume settings."
-            : "Connect with Sonos to control your music during workouts."
+            : "Connect with Sonos to control your music during workouts, or adjust device volume settings for Bluetooth/phone speakers."
           }
         </DialogDescription>
       </DialogHeader>
@@ -326,6 +343,45 @@ export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
             )}
           </>
         )}
+
+        {/* Device Volume Settings - Always visible */}
+        <Separator />
+        <div className="grid gap-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-semibold">Telefoon / Bluetooth Volume</Label>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Gebruik "Hold to Talk" om het volume tijdelijk te verlagen tijdens het praten.
+          </p>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-xs space-y-1">
+              <p><strong>Web browser beperkingen:</strong></p>
+              <ul className="list-disc list-inside space-y-0.5 ml-2">
+                <li>Werkt alleen voor audio op dezelfde pagina (niet in andere tabs)</li>
+                <li>Werkt niet voor desktop apps (Spotify app, Apple Music, etc.)</li>
+                <li>Werkt niet voor systeem audio</li>
+              </ul>
+              <p className="pt-1"><strong>Native app:</strong> In de iOS/Android app werkt volume ducking wel voor alle audio (Spotify, YouTube, etc.)!</p>
+            </AlertDescription>
+          </Alert>
+          <div className="grid gap-3">
+            <Label>Volume tijdens timer: {Math.round(deviceDuckLevel * 100)}%</Label>
+            <Slider
+              value={[deviceDuckLevel * 100]}
+              onValueChange={handleDeviceDuckLevelChange}
+              min={0}
+              max={100}
+              step={5}
+            />
+          </div>
+          <Button 
+            variant="secondary"
+            onClick={handleDeviceVolumeTest}
+          >
+            Test Volume Ducking
+          </Button>
+        </div>
       </div>
 
       {connected && (
