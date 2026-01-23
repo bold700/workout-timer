@@ -12,37 +12,46 @@
         var state = new URLSearchParams(params).get('state');
         var error = new URLSearchParams(params).get('error');
         
-        // Check of we in een Capacitor app zijn
+        // Check of we in een Capacitor app zijn (WebView)
         var isCapacitor = false;
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        
         if (typeof window.Capacitor !== 'undefined' || 
             window.navigator.userAgent.indexOf('Capacitor') !== -1 ||
-            window.navigator.userAgent.indexOf('Workout Timer') !== -1) {
+            window.navigator.userAgent.indexOf('Workout Timer') !== -1 ||
+            (window.webkit && window.webkit.messageHandlers)) {
           isCapacitor = true;
         }
         
-        console.log('Callback page - isCapacitor:', isCapacitor, 'params:', params);
+        console.log('Callback page - isCapacitor:', isCapacitor, 'isIOS:', isIOS, 'params:', params);
         
-        if (isCapacitor) {
-          // In de app: sla parameters op in localStorage en redirect naar root
-          if (code || error) {
-            // Sla callback data op
-            if (code) {
-              localStorage.setItem('sonos_callback_code', code);
+        if (isCapacitor && isIOS && (code || error)) {
+          // In iOS app: redirect naar custom URL scheme zodat Capacitor App plugin het kan vangen
+          var deepLink = 'workouttimer://sonos/callback' + params;
+          console.log('Redirecting to deep link:', deepLink);
+          
+          // Probeer de deep link te openen
+          // Dit zal de app openen via de custom URL scheme
+          window.location.href = deepLink;
+          
+          // Fallback: als deep link niet werkt na 2 seconden, gebruik localStorage bridge
+          setTimeout(function() {
+            if (window.location.href.indexOf('callback') !== -1) {
+              console.log('Deep link fallback: using localStorage bridge');
+              if (code) localStorage.setItem('sonos_callback_code', code);
+              if (state) localStorage.setItem('sonos_callback_state', state);
+              if (error) localStorage.setItem('sonos_callback_error', error);
+              localStorage.setItem('sonos_callback_timestamp', Date.now().toString());
+              l.replace('/');
             }
-            if (state) {
-              localStorage.setItem('sonos_callback_state', state);
-            }
-            if (error) {
-              localStorage.setItem('sonos_callback_error', error);
-            }
-            localStorage.setItem('sonos_callback_timestamp', Date.now().toString());
-            
-            // Redirect naar root (app base path)
-            l.replace('/');
-          } else {
-            // Geen parameters, gewoon naar root
-            l.replace('/');
-          }
+          }, 2000);
+        } else if (isCapacitor && (code || error)) {
+          // Andere platforms (Android): gebruik localStorage bridge
+          if (code) localStorage.setItem('sonos_callback_code', code);
+          if (state) localStorage.setItem('sonos_callback_state', state);
+          if (error) localStorage.setItem('sonos_callback_error', error);
+          localStorage.setItem('sonos_callback_timestamp', Date.now().toString());
+          l.replace('/');
         } else {
           // Web versie: redirect naar web app met params
           var basePath = '/workout-timer/';

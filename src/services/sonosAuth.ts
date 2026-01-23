@@ -7,20 +7,12 @@ import { Capacitor } from '@capacitor/core';
 const SONOS_CLIENT_ID = '24980fc6-b0b3-43d0-982a-0e4314c9e2c4';
 const SONOS_AUTH_URL = 'https://api.sonos.com/login/v3/oauth';
 
-// Dynamische redirect URI: gebruik altijd HTTPS URL (Sonos vereist https://)
-// De callback pagina redirect automatisch naar de app als die beschikbaar is
-function getRedirectUri(): string {
-  // Voor native apps: gebruik GitHub Pages callback URL
-  // De callback pagina detecteert automatisch of het in een app is en redirect naar deep link
-  if (Capacitor.isNativePlatform()) {
-    return 'https://bold700.github.io/workout-timer/callback';
-  }
-  // Voor web: gebruik de huidige origin + /callback
-  const origin = window.location.origin;
-  const pathname = window.location.pathname;
-  // Als we in een subdirectory zitten (zoals /workout-timer/), gebruik die
-  const basePath = pathname.split('/').slice(0, -1).join('/') || '';
-  return `${origin}${basePath}/callback`;
+// Redirect URI: Sonos only accepts https:// URLs, so we always use the web callback
+// The callback page will redirect to custom URL scheme for iOS apps
+export function getRedirectUri(): string {
+  // Always use HTTPS URL (Sonos requirement)
+  // The callback page will handle redirecting to custom URL scheme for iOS
+  return 'https://bold700.github.io/workout-timer/callback';
 }
 
 const SONOS_REDIRECT_URI = getRedirectUri();
@@ -52,20 +44,19 @@ export function startSonosAuth(): void {
   const state = generateState();
   sessionStorage.setItem('sonos_oauth_state', state);
 
-  // Log de redirect URI voor debugging
-  console.log('Sonos OAuth - Redirect URI:', SONOS_REDIRECT_URI);
-  console.log('Sonos OAuth - Is Native Platform:', Capacitor.isNativePlatform());
+  const redirectUri = getRedirectUri();
+  console.log('[Sonos Auth] Starting OAuth flow with redirect URI:', redirectUri);
 
   const params = new URLSearchParams({
     client_id: SONOS_CLIENT_ID,
     response_type: 'code',
-    redirect_uri: SONOS_REDIRECT_URI,
+    redirect_uri: redirectUri,
     scope: 'playback-control-all',
     state: state,
   });
 
   const authUrl = `${SONOS_AUTH_URL}?${params.toString()}`;
-  console.log('Sonos OAuth - Full Auth URL:', authUrl);
+  console.log('[Sonos Auth] Opening:', authUrl);
   
   window.location.href = authUrl;
 }
@@ -92,7 +83,7 @@ export async function handleSonosCallback(code: string, state: string): Promise<
       },
       body: JSON.stringify({
         code,
-        redirect_uri: SONOS_REDIRECT_URI,
+        redirect_uri: getRedirectUri(),
       }),
     });
 
