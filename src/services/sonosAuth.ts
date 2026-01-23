@@ -2,9 +2,28 @@
 // IMPORTANT: In production, token exchange should happen server-side
 // For this app, we use a serverless proxy or local development
 
+import { Capacitor } from '@capacitor/core';
+
 const SONOS_CLIENT_ID = '24980fc6-b0b3-43d0-982a-0e4314c9e2c4';
-const SONOS_REDIRECT_URI = 'https://bold700.github.io/workout-timer/callback';
 const SONOS_AUTH_URL = 'https://api.sonos.com/login/v3/oauth';
+
+// Dynamische redirect URI: gebruik altijd HTTPS URL (Sonos vereist https://)
+// De callback pagina redirect automatisch naar de app als die beschikbaar is
+function getRedirectUri(): string {
+  // Voor native apps: gebruik GitHub Pages callback URL
+  // De callback pagina detecteert automatisch of het in een app is en redirect naar deep link
+  if (Capacitor.isNativePlatform()) {
+    return 'https://bold700.github.io/workout-timer/callback';
+  }
+  // Voor web: gebruik de huidige origin + /callback
+  const origin = window.location.origin;
+  const pathname = window.location.pathname;
+  // Als we in een subdirectory zitten (zoals /workout-timer/), gebruik die
+  const basePath = pathname.split('/').slice(0, -1).join('/') || '';
+  return `${origin}${basePath}/callback`;
+}
+
+const SONOS_REDIRECT_URI = getRedirectUri();
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -33,6 +52,10 @@ export function startSonosAuth(): void {
   const state = generateState();
   sessionStorage.setItem('sonos_oauth_state', state);
 
+  // Log de redirect URI voor debugging
+  console.log('Sonos OAuth - Redirect URI:', SONOS_REDIRECT_URI);
+  console.log('Sonos OAuth - Is Native Platform:', Capacitor.isNativePlatform());
+
   const params = new URLSearchParams({
     client_id: SONOS_CLIENT_ID,
     response_type: 'code',
@@ -41,7 +64,10 @@ export function startSonosAuth(): void {
     state: state,
   });
 
-  window.location.href = `${SONOS_AUTH_URL}?${params.toString()}`;
+  const authUrl = `${SONOS_AUTH_URL}?${params.toString()}`;
+  console.log('Sonos OAuth - Full Auth URL:', authUrl);
+  
+  window.location.href = authUrl;
 }
 
 // Handle OAuth callback - exchange code for tokens
