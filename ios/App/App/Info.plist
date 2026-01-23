@@ -28,6 +28,10 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -50,7 +54,7 @@
 			<string>com.workouttimer.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.workouttimer.app</string>
+				<string>workouttimer</string>
 			</array>
 		</dict>
 	</array>

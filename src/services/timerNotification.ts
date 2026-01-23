@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { TimerMode } from '../types';
 
 export interface TimerNotificationState {
@@ -32,6 +33,10 @@ class TimerNotificationService {
   }
 
   async start(state: TimerNotificationState): Promise<void> {
+    if (Capacitor.isNativePlatform()) {
+      this.currentState = state;
+      return;
+    }
     const hasPermission = await this.requestPermission();
     if (!hasPermission) {
       console.log('Notification permissions niet verleend. Timer notifications werken niet.');
@@ -39,8 +44,7 @@ class TimerNotificationService {
     }
 
     this.currentState = state;
-    
-    // Stuur bericht naar service worker om notification te starten
+
     if ('serviceWorker' in navigator) {
       try {
         const registration = await navigator.serviceWorker.ready;
@@ -56,6 +60,7 @@ class TimerNotificationService {
 
   async update(state: TimerNotificationState): Promise<void> {
     this.currentState = state;
+    if (Capacitor.isNativePlatform()) return;
 
     if ('serviceWorker' in navigator && this.currentState) {
       try {
@@ -71,6 +76,9 @@ class TimerNotificationService {
   }
 
   async stop(): Promise<void> {
+    this.currentState = null;
+    if (Capacitor.isNativePlatform()) return;
+
     if ('serviceWorker' in navigator) {
       try {
         const registration = await navigator.serviceWorker.ready;
@@ -81,8 +89,6 @@ class TimerNotificationService {
         console.error('Fout bij stoppen timer notification:', error);
       }
     }
-
-    this.currentState = null;
   }
 
   getCurrentState(): TimerNotificationState | null {

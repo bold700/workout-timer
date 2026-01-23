@@ -2,20 +2,9 @@
 // IMPORTANT: In production, token exchange should happen server-side
 // For this app, we use a serverless proxy or local development
 
-import { Capacitor } from '@capacitor/core';
-
 const SONOS_CLIENT_ID = '24980fc6-b0b3-43d0-982a-0e4314c9e2c4';
+const SONOS_REDIRECT_URI = 'https://bold700.github.io/workout-timer/callback';
 const SONOS_AUTH_URL = 'https://api.sonos.com/login/v3/oauth';
-
-// Redirect URI: Sonos only accepts https:// URLs, so we always use the web callback
-// The callback page will redirect to custom URL scheme for iOS apps
-export function getRedirectUri(): string {
-  // Always use HTTPS URL (Sonos requirement)
-  // The callback page will handle redirecting to custom URL scheme for iOS
-  return 'https://bold700.github.io/workout-timer/callback';
-}
-
-const SONOS_REDIRECT_URI = getRedirectUri();
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -44,21 +33,15 @@ export function startSonosAuth(): void {
   const state = generateState();
   sessionStorage.setItem('sonos_oauth_state', state);
 
-  const redirectUri = getRedirectUri();
-  console.log('[Sonos Auth] Starting OAuth flow with redirect URI:', redirectUri);
-
   const params = new URLSearchParams({
     client_id: SONOS_CLIENT_ID,
     response_type: 'code',
-    redirect_uri: redirectUri,
+    redirect_uri: SONOS_REDIRECT_URI,
     scope: 'playback-control-all',
     state: state,
   });
 
-  const authUrl = `${SONOS_AUTH_URL}?${params.toString()}`;
-  console.log('[Sonos Auth] Opening:', authUrl);
-  
-  window.location.href = authUrl;
+  window.location.href = `${SONOS_AUTH_URL}?${params.toString()}`;
 }
 
 // Handle OAuth callback - exchange code for tokens
@@ -83,7 +66,7 @@ export async function handleSonosCallback(code: string, state: string): Promise<
       },
       body: JSON.stringify({
         code,
-        redirect_uri: getRedirectUri(),
+        redirect_uri: SONOS_REDIRECT_URI,
       }),
     });
 

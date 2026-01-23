@@ -19,6 +19,16 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
       const state = urlParams.get('state');
       const error = urlParams.get('error');
 
+      // Log callback URL en params (alleen in dev)
+      if (import.meta.env.DEV) {
+        console.log('[SonosCallback] Full URL:', window.location.href);
+        console.log('[SonosCallback] Parsed params:', { 
+          code: code ? '***' : null, 
+          state, 
+          error 
+        });
+      }
+
       if (error) {
         setStatus('error');
         setMessage(`Sonos login denied: ${error}`);
@@ -30,6 +40,21 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
         setStatus('error');
         setMessage('Invalid callback - missing parameters');
         onError('Missing parameters');
+        return;
+      }
+
+      // Validate state matches stored state
+      const savedState = sessionStorage.getItem('sonos_oauth_state');
+      if (state !== savedState) {
+        if (import.meta.env.DEV) {
+          console.error('[SonosCallback] OAuth state mismatch:', {
+            received: state,
+            expected: savedState
+          });
+        }
+        setStatus('error');
+        setMessage('Security error: State mismatch. Please try again.');
+        onError('State mismatch');
         return;
       }
 

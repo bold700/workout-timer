@@ -12,10 +12,12 @@ import SettingsPanel from './components/SettingsPanel';
 import SonosPanel, { getDuckLevel } from './components/SonosPanel';
 import SonosCallback from './components/SonosCallback';
 import HoldToTalk from './components/HoldToTalk';
-import { isAuthenticated } from './services/sonosAuth';
+import { isAuthenticated, handleSonosCallback } from './services/sonosAuth';
 import { timerNotificationService } from './services/timerNotification';
 import { nativeAudioDuckingService } from './services/nativeAudioDucking';
 import { useIsMobile } from './hooks/useIsMobile';
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 export default function App() {
   const [mode, setMode] = useState<TimerMode>('stopwatch');
@@ -28,49 +30,110 @@ export default function App() {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Check voor callback parameters in URL (web)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('code') || urlParams.has('error')) {
       setIsCallback(true);
-      setSonosConnected(isAuthenticated());
-      return;
     }
-    
-    // Check voor callback parameters in localStorage (native app)
-    // De callback pagina slaat deze op wanneer het in de app wordt geladen
-    const callbackCode = localStorage.getItem('sonos_callback_code');
-    const callbackState = localStorage.getItem('sonos_callback_state');
-    const callbackError = localStorage.getItem('sonos_callback_error');
-    const callbackTimestamp = localStorage.getItem('sonos_callback_timestamp');
-    
-    if (callbackCode || callbackError) {
-      // Check of callback recent is (binnen 10 seconden)
-      if (callbackTimestamp) {
-        const timestamp = parseInt(callbackTimestamp, 10);
-        const now = Date.now();
-        if (now - timestamp < 10000) { // 10 seconden
-          console.log('[App] Callback detected in localStorage:', { callbackCode, callbackState, callbackError });
-          
-          // Verwijder callback data uit localStorage
-          localStorage.removeItem('sonos_callback_code');
-          localStorage.removeItem('sonos_callback_state');
-          localStorage.removeItem('sonos_callback_error');
-          localStorage.removeItem('sonos_callback_timestamp');
-          
-          // Update URL met parameters zodat SonosCallback component ze kan verwerken
-          const newUrl = new URL(window.location.href);
-          if (callbackCode) newUrl.searchParams.set('code', callbackCode);
-          if (callbackState) newUrl.searchParams.set('state', callbackState);
-          if (callbackError) newUrl.searchParams.set('error', callbackError);
-          window.history.replaceState({}, '', newUrl.toString());
-          
-          setIsCallback(true);
-        }
-      }
-    }
-    
     setSonosConnected(isAuthenticated());
   }, []);
+
+  // Deep link handling voor iOS (workouttimer://sonos/callback?code=...&state=...)
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    const handleAppUrl = async (event: { url: string }) => {
+      const url = event.url;
+      
+      // Log de volledige URL (alleen in dev)
+      if (import.meta.env.DEV) {
+        console.log('[App] Deep link ontvangen:', url);
+      }
+
+      // Parse workouttimer://sonos/callback?code=...&state=...
+      try {
+        // Custom scheme URLs hebben formaat: workouttimer://sonos/callback?code=...&state=...
+        if (!url.startsWith('workouttimer://')) {
+          return;
+        }
+
+        // Extract path en query string
+        const match = url.match(/^workouttimer:\/\/([^?]+)(\?.*)?$/);
+        if (!match) {
+          return;
+        }
+
+        const path = match[1];
+        const queryString = match[2] || '';
+        
+        if (path === 'sonos/callback') {
+          const params = new URLSearchParams(queryString);
+          const code = params.get('code');
+          const state = params.get('state');
+          const error = params.get('error');
+
+          if (import.meta.env.DEV) {
+            console.log('[App] Parsed deep link params:', { 
+              code: code ? '***' : null, 
+              state, 
+              error 
+            });
+          }
+
+          if (error) {
+            console.error('[App] Sonos auth error from deep link:', error);
+            handleCallbackError(error);
+            return;
+          }
+
+          if (!code || !state) {
+            console.error('[App] Invalid deep link - missing code or state');
+            handleCallbackError('Missing parameters');
+            return;
+          }
+
+          // Validate state matches stored state
+          const savedState = sessionStorage.getItem('sonos_oauth_state');
+          if (state !== savedState) {
+            console.error('[App] OAuth state mismatch - possible CSRF attack');
+            handleCallbackError('State mismatch');
+            return;
+          }
+
+          // Show callback UI
+          setIsCallback(true);
+
+          // Handle the callback
+          const success = await handleSonosCallback(code, state);
+          
+          if (success) {
+            handleCallbackSuccess();
+          } else {
+            handleCallbackError('Token exchange failed');
+          }
+        }
+      } catch (err) {
+        console.error('[App] Error parsing deep link:', err);
+      }
+    };
+
+    // Listen for app URL open events
+    const listener = CapacitorApp.addListener('appUrlOpen', handleAppUrl);
+
+    // Also check if app was opened with a URL (cold start)
+    CapacitorApp.getLaunchUrl().then((result) => {
+      if (result?.url) {
+        handleAppUrl({ url: result.url });
+      }
+    }).catch(() => {
+      // No launch URL, ignore
+    });
+
+    return () => {
+      listener.then(l => l.remove());
+    };
+  }, [handleCallbackSuccess, handleCallbackError]);
 
   const handleCallbackSuccess = useCallback(() => {
     setIsCallback(false);

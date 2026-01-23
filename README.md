@@ -57,12 +57,28 @@ De app gebruikt **Capacitor** voor native iOS en Android builds. In de native ap
 
 ### iOS (App Store)
 
-1. Build de web app: `npm run build`
+Gebruik het **iOS-specifieke build** (base path `/` i.p.v. `/workout-timer/` voor de webversie):
+
+```bash
+# Alles in één: build voor iOS → sync → Xcode openen
+npm run ios
+```
+
+Of stap voor stap:
+
+1. Build voor iOS: `npm run build:ios`
 2. Sync met Capacitor: `npx cap sync ios`
 3. Open in Xcode: `npx cap open ios`
-4. Configureer je app ID en signing in Xcode
-5. Build en test in Xcode
-6. Submit naar App Store via Xcode
+
+**Test op je eigen iPhone:**
+
+1. Sluit je iPhone aan met USB
+2. In Xcode: kies je **Team** (Signing & Capabilities) en zet **Automatically manage signing** aan
+3. Selecteer je iPhone als run destination (boven de Play-knop)
+4. Klik **Run** (▶) of `Cmd + R`
+5. Op je iPhone: **Instellingen → Algemeen → VPN & apparaatbeheer** → vertrouw je developer certificate indien nodig
+
+**App Store release:** Build → Archive → Distribute App → App Store Connect.
 
 **Belangrijk:** De native iOS app kan het volume van andere apps tijdelijk verlagen via AVAudioSession ducking.
 

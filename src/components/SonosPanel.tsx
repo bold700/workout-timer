@@ -1,18 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  BottomSheetContent,
-  BottomSheetHeader,
-  BottomSheetTitle,
-  BottomSheetDescription,
-  BottomSheetFooter
-} from '@/components/ui/bottom-sheet';
-import {
-  SideSheetContent,
-  SideSheetHeader,
-  SideSheetTitle,
-  SideSheetDescription,
-  SideSheetFooter
-} from '@/components/ui/side-sheet';
+import { 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -47,15 +40,13 @@ import {
   SonosHousehold, 
   SonosGroup 
 } from '../services/sonosApi';
-import { nativeAudioDuckingService } from '../services/nativeAudioDucking';
 
 interface SonosPanelProps {
   onClose?: () => void;
   onConnectionChange: (connected: boolean) => void;
-  isMobile?: boolean;
 }
 
-export default function SonosPanel({ onConnectionChange, isMobile = false }: SonosPanelProps) {
+export default function SonosPanel({ onConnectionChange }: SonosPanelProps) {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [households, setHouseholds] = useState<SonosHousehold[]>([]);
@@ -66,9 +57,6 @@ export default function SonosPanel({ onConnectionChange, isMobile = false }: Son
   const [duckLevel, setDuckLevel] = useState<number>(() => {
     const saved = localStorage.getItem('sonos_duck_level');
     return saved ? parseInt(saved, 10) : 20;
-  });
-  const [deviceDuckLevel, setDeviceDuckLevel] = useState<number>(() => {
-    return nativeAudioDuckingService.getDuckLevel();
   });
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -175,19 +163,6 @@ export default function SonosPanel({ onConnectionChange, isMobile = false }: Son
     localStorage.setItem('sonos_duck_level', level.toString());
   };
 
-  const handleDeviceDuckLevelChange = (value: number[]) => {
-    const level = value[0] / 100; // Convert percentage to 0-1 range
-    setDeviceDuckLevel(level);
-    nativeAudioDuckingService.setDuckLevel(level);
-  };
-
-  const handleDeviceVolumeTest = async () => {
-    await nativeAudioDuckingService.duckVolume();
-    setTimeout(async () => {
-      await nativeAudioDuckingService.restoreVolume();
-    }, 2000);
-  };
-
   const handleVolumeChange = async (value: number[]) => {
     const newVolume = value[0];
     setCurrentVolume(newVolume);
@@ -205,28 +180,20 @@ export default function SonosPanel({ onConnectionChange, isMobile = false }: Son
     }, 2000);
   };
 
-  // Kies de juiste componenten op basis van mobile/desktop
-  // Mobile: BottomSheet, Desktop: SideSheet
-  const Content = isMobile ? BottomSheetContent : SideSheetContent;
-  const Header = isMobile ? BottomSheetHeader : SideSheetHeader;
-  const Title = isMobile ? BottomSheetTitle : SideSheetTitle;
-  const Description = isMobile ? BottomSheetDescription : SideSheetDescription;
-  const Footer = isMobile ? BottomSheetFooter : SideSheetFooter;
-
   return (
-    <Content className={isMobile ? "" : ""}>
-      <Header>
-        <Title className="flex items-center gap-2">
+    <DialogContent className="sm:max-w-[400px]">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
           <Volume2 className="h-5 w-5" />
           Sonos Settings
-        </Title>
-        <Description>
+        </DialogTitle>
+        <DialogDescription>
           {connected 
             ? "Control your Sonos speakers and adjust volume settings."
-            : "Connect with Sonos to control your music during workouts, or adjust device volume settings for Bluetooth/phone speakers."
+            : "Connect with Sonos to control your music during workouts."
           }
-        </Description>
-      </Header>
+        </DialogDescription>
+      </DialogHeader>
 
       <div className="grid gap-4 min-w-0">
         {!connected ? (
@@ -359,49 +326,10 @@ export default function SonosPanel({ onConnectionChange, isMobile = false }: Son
             )}
           </>
         )}
-
-        {/* Device Volume Settings - Always visible */}
-        <Separator />
-        <div className="grid gap-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold">Telefoon / Bluetooth Volume</Label>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Gebruik "Hold to Talk" om het volume tijdelijk te verlagen tijdens het praten.
-          </p>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-xs space-y-1">
-              <p><strong>Web browser beperkingen:</strong></p>
-              <ul className="list-disc list-inside space-y-0.5 ml-2">
-                <li>Werkt alleen voor audio op dezelfde pagina (niet in andere tabs)</li>
-                <li>Werkt niet voor desktop apps (Spotify app, Apple Music, etc.)</li>
-                <li>Werkt niet voor systeem audio</li>
-              </ul>
-              <p className="pt-1"><strong>Native app:</strong> In de iOS/Android app werkt volume ducking wel voor alle audio (Spotify, YouTube, etc.)!</p>
-            </AlertDescription>
-          </Alert>
-          <div className="grid gap-3">
-            <Label>Volume tijdens timer: {Math.round(deviceDuckLevel * 100)}%</Label>
-            <Slider
-              value={[deviceDuckLevel * 100]}
-              onValueChange={handleDeviceDuckLevelChange}
-              min={0}
-              max={100}
-              step={5}
-            />
-          </div>
-          <Button 
-            variant="secondary"
-            onClick={handleDeviceVolumeTest}
-          >
-            Test Volume Ducking
-          </Button>
-        </div>
       </div>
 
       {connected && (
-        <Footer>
+        <DialogFooter>
           <Button 
             variant="destructive"
             className="w-full"
@@ -410,9 +338,9 @@ export default function SonosPanel({ onConnectionChange, isMobile = false }: Son
             <LogOut className="h-4 w-4" />
             Disconnect Sonos
           </Button>
-        </Footer>
+        </DialogFooter>
       )}
-    </Content>
+    </DialogContent>
   );
 }
 

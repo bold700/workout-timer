@@ -25,7 +25,7 @@ const tabsListVariants = cva(
         default:
           "bg-muted text-muted-foreground h-9 w-fit rounded-lg p-[3px]",
         line:
-          "border-b border-border w-full justify-center gap-4 rounded-none bg-transparent pt-10 pb-0 px-0",
+          "border-b border-border w-full justify-center gap-4 rounded-none bg-transparent pt-5 pb-0 px-0",
       },
     },
     defaultVariants: {

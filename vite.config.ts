@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
 export default defineConfig({
-  base: '/workout-timer/',
+  base: process.env.VITE_CAPACITOR ? '/' : '/workout-timer/',
   publicDir: 'public',
   resolve: {
     alias: {
