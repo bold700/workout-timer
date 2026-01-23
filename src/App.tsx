@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { TimerMode } from './types';
 import { useStopwatch, useCountdown, useIntervalTimer } from './hooks/useTimer';
 import { Button } from '@/components/ui/button';
@@ -27,13 +28,75 @@ export default function App() {
   const [intervalSettings, setIntervalSettings] = useState({ workTime: 30, restTime: 10, rounds: 8 });
   const isMobile = useIsMobile();
 
-  useEffect(() => {
+  // Check voor callback parameters bij mount en wanneer app focus krijgt
+  const checkForCallback = useCallback(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const urlHash = window.location.hash;
+    
+    // Check query parameters (voor web en deep links)
     if (urlParams.has('code') || urlParams.has('error')) {
+      console.log('[App] Callback detected in query params:', {
+        code: urlParams.get('code'),
+        state: urlParams.get('state'),
+        error: urlParams.get('error')
+      });
       setIsCallback(true);
+      return;
     }
-    setSonosConnected(isAuthenticated());
+    
+    // Check hash parameters (sommige deep links gebruiken hash)
+    if (urlHash) {
+      const hashParams = new URLSearchParams(urlHash.substring(1));
+      if (hashParams.has('code') || hashParams.has('error')) {
+        console.log('[App] Callback detected in hash:', {
+          code: hashParams.get('code'),
+          state: hashParams.get('state'),
+          error: hashParams.get('error')
+        });
+        setIsCallback(true);
+        return;
+      }
+    }
+    
+    // Check de volledige URL voor deep link pattern
+    const fullUrl = window.location.href;
+    if (fullUrl.includes('callback') && (fullUrl.includes('code=') || fullUrl.includes('error='))) {
+      console.log('[App] Callback detected in URL:', fullUrl);
+      // Parse de URL opnieuw
+      try {
+        const url = new URL(fullUrl);
+        const code = url.searchParams.get('code') || url.hash.match(/code=([^&]+)/)?.[1];
+        const error = url.searchParams.get('error') || url.hash.match(/error=([^&]+)/)?.[1];
+        if (code || error) {
+          setIsCallback(true);
+        }
+      } catch (e) {
+        console.error('[App] Error parsing callback URL:', e);
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    checkForCallback();
+    setSonosConnected(isAuthenticated());
+    
+    // Luister naar app focus events (wanneer app heropent via deep link)
+    if (Capacitor.isNativePlatform()) {
+      const handleFocus = () => {
+        console.log('[App] App gained focus, checking for callback');
+        // Kleine delay om zeker te zijn dat URL is bijgewerkt
+        setTimeout(checkForCallback, 100);
+      };
+      
+      window.addEventListener('focus', handleFocus);
+      document.addEventListener('visibilitychange', handleFocus);
+      
+      return () => {
+        window.removeEventListener('focus', handleFocus);
+        document.removeEventListener('visibilitychange', handleFocus);
+      };
+    }
+  }, [checkForCallback]);
 
   const handleCallbackSuccess = useCallback(() => {
     setIsCallback(false);
@@ -254,7 +317,6 @@ export default function App() {
               </BottomSheetTrigger>
               <SonosPanel
                 onConnectionChange={handleSonosConnectionChange}
-                isMobile={true}
               />
             </BottomSheet>
           ) : (
@@ -267,7 +329,6 @@ export default function App() {
               </SideSheetTrigger>
               <SonosPanel
                 onConnectionChange={handleSonosConnectionChange}
-                isMobile={false}
               />
             </SideSheet>
           )}
@@ -275,9 +336,8 @@ export default function App() {
       </div>
 
       <HoldToTalk 
-        isConnected={true}
+        isConnected={sonosConnected}
         duckLevel={getDuckLevel()}
-        sonosConnected={sonosConnected}
       />
     </div>
   );

@@ -8,71 +8,58 @@
       (function() {
         var l = window.location;
         var params = l.search;
-        
-        // Detecteer of we in een Capacitor app zijn
-        var isCapacitor = false;
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         var isAndroid = /Android/.test(navigator.userAgent);
+        var isMobile = isIOS || isAndroid;
         
-        // Check 1: User agent bevat vaak "Capacitor" of "Workout Timer"
-        if (navigator.userAgent.indexOf('Capacitor') !== -1 || 
-            navigator.userAgent.indexOf('Workout Timer') !== -1 ||
-            navigator.userAgent.indexOf('ionic') !== -1) {
-          isCapacitor = true;
-        }
+        console.log('Callback page loaded', {
+          userAgent: navigator.userAgent,
+          isIOS: isIOS,
+          isAndroid: isAndroid,
+          params: params
+        });
         
-        // Check 2: Probeer Capacitor bridge te detecteren
-        if (typeof window.Capacitor !== 'undefined' || 
-            typeof window.CapacitorWeb !== 'undefined' ||
-            (window.webkit && window.webkit.messageHandlers)) {
-          isCapacitor = true;
-        }
-        
-        // Check 3: Als we in een WebView zijn (standalone mode)
-        if (window.navigator.standalone === true || 
-            (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)) {
-          isCapacitor = true;
-        }
-        
-        console.log('Callback - Is Capacitor:', isCapacitor, 'Params:', params);
-        
-        // Als we in een native app zijn, probeer deep link redirect
-        if (isCapacitor) {
+        // ALTIJD proberen deep link te openen op mobile devices
+        // Als de app geïnstalleerd is, zal iOS/Android de deep link afhandelen
+        if (isMobile) {
           var deepLink = 'com.workouttimer.app://callback' + params;
-          console.log('Attempting deep link redirect:', deepLink);
+          console.log('Attempting to open deep link:', deepLink);
           
-          // Voor iOS: gebruik window.location direct
+          // Probeer direct de deep link te openen
+          // Op iOS: als de app geïnstalleerd is, opent iOS de app automatisch
+          // Op Android: gebruik intent:// URL
           if (isIOS) {
-            // Probeer eerst de deep link
+            // iOS: probeer direct deep link
             window.location.href = deepLink;
             
-            // Fallback: na 1 seconde, als we nog steeds op deze pagina zijn, 
-            // probeer de app te openen via Capacitor App plugin of gewoon door te gaan
+            // Fallback: als de app niet geïnstalleerd is of deep link niet werkt,
+            // redirect naar web versie na 2 seconden
             setTimeout(function() {
-              // Als we nog steeds hier zijn, betekent het dat de deep link niet werkte
-              // In dat geval blijven we op deze pagina en laat de app de callback verwerken
-              console.log('Deep link may not have worked, staying on callback page');
-              // De app zal de URL parameters detecteren en verwerken
-            }, 1000);
-          } 
-          // Voor Android: gebruik intent:// URL
-          else if (isAndroid) {
+              // Check of we nog steeds op deze pagina zijn
+              // Als de deep link werkte, zijn we al weg
+              if (window.location.href.indexOf('callback') !== -1) {
+                console.log('Deep link did not work, redirecting to web version');
+                redirectToWeb();
+              }
+            }, 2000);
+          } else if (isAndroid) {
+            // Android: gebruik intent:// URL
             var intentUrl = 'intent://callback' + params + '#Intent;scheme=com.workouttimer.app;package=com.workouttimer.app;end';
             try {
               window.location.href = intentUrl;
+              // Fallback na 2 seconden
+              setTimeout(function() {
+                if (window.location.href.indexOf('callback') !== -1) {
+                  redirectToWeb();
+                }
+              }, 2000);
             } catch (e) {
               console.error('Intent URL failed:', e);
-              // Fallback naar web
               redirectToWeb();
             }
           }
-          else {
-            // Andere platformen: probeer deep link
-            window.location.href = deepLink;
-            setTimeout(redirectToWeb, 2000);
-          }
         } else {
-          // Web versie: redirect naar main app met params
+          // Desktop/Web: redirect naar web versie
           redirectToWeb();
         }
         
