@@ -47,7 +47,7 @@ export default function App() {
       const url = event.url;
       
       // Log de volledige URL (alleen in dev)
-      if (import.meta.env.DEV) {
+      if ((import.meta as any).env?.DEV) {
         console.log('[App] Deep link ontvangen:', url);
       }
 
@@ -73,7 +73,7 @@ export default function App() {
           const state = params.get('state');
           const error = params.get('error');
 
-          if (import.meta.env.DEV) {
+          if ((import.meta as any).env?.DEV) {
             console.log('[App] Parsed deep link params:', { 
               code: code ? '***' : null, 
               state, 
@@ -133,7 +133,8 @@ export default function App() {
     return () => {
       listener.then(l => l.remove());
     };
-  }, [handleCallbackSuccess, handleCallbackError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // handleCallbackSuccess en handleCallbackError zijn stable callbacks
 
   const handleCallbackSuccess = useCallback(() => {
     setIsCallback(false);

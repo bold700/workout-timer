@@ -20,7 +20,7 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
       const error = urlParams.get('error');
 
       // Log callback URL en params (alleen in dev)
-      if (import.meta.env.DEV) {
+      if ((import.meta as any).env?.DEV) {
         console.log('[SonosCallback] Full URL:', window.location.href);
         console.log('[SonosCallback] Parsed params:', { 
           code: code ? '***' : null, 
@@ -46,7 +46,7 @@ export default function SonosCallback({ onSuccess, onError }: SonosCallbackProps
       // Validate state matches stored state
       const savedState = sessionStorage.getItem('sonos_oauth_state');
       if (state !== savedState) {
-        if (import.meta.env.DEV) {
+        if ((import.meta as any).env?.DEV) {
           console.error('[SonosCallback] OAuth state mismatch:', {
             received: state,
             expected: savedState
