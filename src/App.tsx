@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Capacitor } from '@capacitor/core';
 import { TimerMode } from './types';
 import { useStopwatch, useCountdown, useIntervalTimer } from './hooks/useTimer';
 import { Button } from '@/components/ui/button';
@@ -28,75 +27,50 @@ export default function App() {
   const [intervalSettings, setIntervalSettings] = useState({ workTime: 30, restTime: 10, rounds: 8 });
   const isMobile = useIsMobile();
 
-  // Check voor callback parameters bij mount en wanneer app focus krijgt
-  const checkForCallback = useCallback(() => {
+  useEffect(() => {
+    // Check voor callback parameters in URL (web)
     const urlParams = new URLSearchParams(window.location.search);
-    const urlHash = window.location.hash;
-    
-    // Check query parameters (voor web en deep links)
     if (urlParams.has('code') || urlParams.has('error')) {
-      console.log('[App] Callback detected in query params:', {
-        code: urlParams.get('code'),
-        state: urlParams.get('state'),
-        error: urlParams.get('error')
-      });
       setIsCallback(true);
+      setSonosConnected(isAuthenticated());
       return;
     }
     
-    // Check hash parameters (sommige deep links gebruiken hash)
-    if (urlHash) {
-      const hashParams = new URLSearchParams(urlHash.substring(1));
-      if (hashParams.has('code') || hashParams.has('error')) {
-        console.log('[App] Callback detected in hash:', {
-          code: hashParams.get('code'),
-          state: hashParams.get('state'),
-          error: hashParams.get('error')
-        });
-        setIsCallback(true);
-        return;
-      }
-    }
+    // Check voor callback parameters in localStorage (native app)
+    // De callback pagina slaat deze op wanneer het in de app wordt geladen
+    const callbackCode = localStorage.getItem('sonos_callback_code');
+    const callbackState = localStorage.getItem('sonos_callback_state');
+    const callbackError = localStorage.getItem('sonos_callback_error');
+    const callbackTimestamp = localStorage.getItem('sonos_callback_timestamp');
     
-    // Check de volledige URL voor deep link pattern
-    const fullUrl = window.location.href;
-    if (fullUrl.includes('callback') && (fullUrl.includes('code=') || fullUrl.includes('error='))) {
-      console.log('[App] Callback detected in URL:', fullUrl);
-      // Parse de URL opnieuw
-      try {
-        const url = new URL(fullUrl);
-        const code = url.searchParams.get('code') || url.hash.match(/code=([^&]+)/)?.[1];
-        const error = url.searchParams.get('error') || url.hash.match(/error=([^&]+)/)?.[1];
-        if (code || error) {
+    if (callbackCode || callbackError) {
+      // Check of callback recent is (binnen 10 seconden)
+      if (callbackTimestamp) {
+        const timestamp = parseInt(callbackTimestamp, 10);
+        const now = Date.now();
+        if (now - timestamp < 10000) { // 10 seconden
+          console.log('[App] Callback detected in localStorage:', { callbackCode, callbackState, callbackError });
+          
+          // Verwijder callback data uit localStorage
+          localStorage.removeItem('sonos_callback_code');
+          localStorage.removeItem('sonos_callback_state');
+          localStorage.removeItem('sonos_callback_error');
+          localStorage.removeItem('sonos_callback_timestamp');
+          
+          // Update URL met parameters zodat SonosCallback component ze kan verwerken
+          const newUrl = new URL(window.location.href);
+          if (callbackCode) newUrl.searchParams.set('code', callbackCode);
+          if (callbackState) newUrl.searchParams.set('state', callbackState);
+          if (callbackError) newUrl.searchParams.set('error', callbackError);
+          window.history.replaceState({}, '', newUrl.toString());
+          
           setIsCallback(true);
         }
-      } catch (e) {
-        console.error('[App] Error parsing callback URL:', e);
       }
     }
-  }, []);
-
-  useEffect(() => {
-    checkForCallback();
-    setSonosConnected(isAuthenticated());
     
-    // Luister naar app focus events (wanneer app heropent via deep link)
-    if (Capacitor.isNativePlatform()) {
-      const handleFocus = () => {
-        console.log('[App] App gained focus, checking for callback');
-        // Kleine delay om zeker te zijn dat URL is bijgewerkt
-        setTimeout(checkForCallback, 100);
-      };
-      
-      window.addEventListener('focus', handleFocus);
-      document.addEventListener('visibilitychange', handleFocus);
-      
-      return () => {
-        window.removeEventListener('focus', handleFocus);
-        document.removeEventListener('visibilitychange', handleFocus);
-      };
-    }
-  }, [checkForCallback]);
+    setSonosConnected(isAuthenticated());
+  }, []);
 
   const handleCallbackSuccess = useCallback(() => {
     setIsCallback(false);

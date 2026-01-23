@@ -8,86 +8,55 @@
       (function() {
         var l = window.location;
         var params = l.search;
-        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        var isAndroid = /Android/.test(navigator.userAgent);
-        var isMobile = isIOS || isAndroid;
+        var code = new URLSearchParams(params).get('code');
+        var state = new URLSearchParams(params).get('state');
+        var error = new URLSearchParams(params).get('error');
         
-        console.log('Callback page loaded', {
-          userAgent: navigator.userAgent,
-          isIOS: isIOS,
-          isAndroid: isAndroid,
-          params: params
-        });
-        
-        // ALTIJD proberen deep link te openen op mobile devices
-        // Als de app geïnstalleerd is, zal iOS/Android de deep link afhandelen
-        if (isMobile) {
-          var deepLink = 'com.workouttimer.app://callback' + params;
-          console.log('Attempting to open deep link:', deepLink);
-          
-          // Probeer direct de deep link te openen
-          // Op iOS: als de app geïnstalleerd is, opent iOS de app automatisch
-          // Op Android: gebruik intent:// URL
-          if (isIOS) {
-            // iOS: probeer direct deep link
-            window.location.href = deepLink;
-            
-            // Fallback: als de app niet geïnstalleerd is of deep link niet werkt,
-            // redirect naar web versie na 2 seconden
-            setTimeout(function() {
-              // Check of we nog steeds op deze pagina zijn
-              // Als de deep link werkte, zijn we al weg
-              if (window.location.href.indexOf('callback') !== -1) {
-                console.log('Deep link did not work, redirecting to web version');
-                redirectToWeb();
-              }
-            }, 2000);
-          } else if (isAndroid) {
-            // Android: gebruik intent:// URL
-            var intentUrl = 'intent://callback' + params + '#Intent;scheme=com.workouttimer.app;package=com.workouttimer.app;end';
-            try {
-              window.location.href = intentUrl;
-              // Fallback na 2 seconden
-              setTimeout(function() {
-                if (window.location.href.indexOf('callback') !== -1) {
-                  redirectToWeb();
-                }
-              }, 2000);
-            } catch (e) {
-              console.error('Intent URL failed:', e);
-              redirectToWeb();
-            }
-          }
-        } else {
-          // Desktop/Web: redirect naar web versie
-          redirectToWeb();
+        // Check of we in een Capacitor app zijn
+        var isCapacitor = false;
+        if (typeof window.Capacitor !== 'undefined' || 
+            window.navigator.userAgent.indexOf('Capacitor') !== -1 ||
+            window.navigator.userAgent.indexOf('Workout Timer') !== -1) {
+          isCapacitor = true;
         }
         
-        function redirectToWeb() {
-          // Detect base path from current location
-          var pathParts = l.pathname.split('/');
-          // Remove empty parts and 'callback'
-          pathParts = pathParts.filter(function(part) {
-            return part && part !== 'callback';
-          });
-          var basePath = pathParts.length > 0 ? '/' + pathParts.join('/') + '/' : '/';
-          
-          // Build redirect URL
-          var redirectUrl = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        console.log('Callback page - isCapacitor:', isCapacitor, 'params:', params);
+        
+        if (isCapacitor) {
+          // In de app: sla parameters op in localStorage en redirect naar root
+          if (code || error) {
+            // Sla callback data op
+            if (code) {
+              localStorage.setItem('sonos_callback_code', code);
+            }
+            if (state) {
+              localStorage.setItem('sonos_callback_state', state);
+            }
+            if (error) {
+              localStorage.setItem('sonos_callback_error', error);
+            }
+            localStorage.setItem('sonos_callback_timestamp', Date.now().toString());
+            
+            // Redirect naar root (app base path)
+            l.replace('/');
+          } else {
+            // Geen parameters, gewoon naar root
+            l.replace('/');
+          }
+        } else {
+          // Web versie: redirect naar web app met params
+          var basePath = '/workout-timer/';
+          l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
             basePath +
             params +
-            (l.hash || '');
-          
-          console.log('Redirecting to web:', redirectUrl);
-          l.replace(redirectUrl);
+            (l.hash || '')
+          );
         }
       })();
     </script>
   </head>
   <body>
     <p>Verbinden met Sonos...</p>
-    <p style="font-size: 12px; color: #666; margin-top: 20px;">
-      Als je niet automatisch wordt doorgestuurd, <a href="#" onclick="window.location.reload(); return false;">klik hier</a>.
-    </p>
   </body>
 </html>
